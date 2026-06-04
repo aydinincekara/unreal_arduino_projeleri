@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 2: Gerçek Dünyaya Dönüş - Unreal'dan Arduino Kontrolü</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --arduino-teal: #00979d;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #12151f 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--ue-blue);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--ue-blue); color: #fff; border-color: var(--ue-blue); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--ue-blue); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--ue-blue);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--ue-blue); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+        .alert-success { border-color: var(--success-color); }
+        .alert-success strong { color: var(--success-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 2: Gerçek Dünyaya Dönüş</h1>
+                <p>Sanal Olayların Fiziksel Dünyaya Tepkisi (Unreal -> Arduino)</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sanal Tetikleyici, Gerçek Işık</h2>
+            <p>Bir önceki projede fiziksel bir butona basıp oyunda bir şeyler ürettik. Bu projede işleri tersine çeviriyoruz! Unreal Engine'deki karakterimiz gizli bir odaya veya güvenli bir bölgeye (Trigger Box) girdiğinde, oyun motoru USB üzerinden Arduino'ya bir sinyal gönderecek. Arduino bu sinyali okuyup masamızdaki fiziksel bir LED'i yakacak. Karakter bölgeden çıktığında ise LED sönecek.</p>
+            <br>
+            
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Arduino Kodu (Dinleyici)</h2>
+            <p>Bu sefer Arduino veri gönderen (Transmitter) değil, veri alan (Receiver) konumunda. Unreal Engine bize "1" gönderirse ışığı yakacağız, "0" gönderirse söndüreceğiz. Bir adet LED'in uzun bacağını (Anot) araya 220 ohm direnç katarak <strong>Dijital 8</strong> pinine, kısa bacağını (Katot) GND pinine bağlayın.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Gelen Veriyi Dinle</span>
+<span class="keyword">const int</span> ledPin = 8; <span class="comment">// LED'i 8 numaralı pine bağladık</span>
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600); <span class="comment">// Unreal ile aynı iletişim hızı</span>
+  pinMode(ledPin, OUTPUT); <span class="comment">// LED pinini ÇIKIŞ olarak ayarla</span>
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Eğer USB üzerinden gelen bir veri varsa (Serial.available > 0)</span>
+  <span class="keyword">if</span> (Serial.available() > 0) {
+    
+    <span class="comment">// Gelen tek bir karakteri (harf/rakam) oku</span>
+    <span class="keyword">char</span> gelenVeri = Serial.read(); 
+    
+    <span class="comment">// Unreal bize '1' karakterini gönderdiyse</span>
+    <span class="keyword">if</span> (gelenVeri == '1') {
+      digitalWrite(ledPin, HIGH); <span class="comment">// Işığı YAK</span>
+    }
+    <span class="comment">// Unreal bize '0' karakterini gönderdiyse</span>
+    <span class="keyword">else if</span> (gelenVeri == '0') {
+      digitalWrite(ledPin, LOW);  <span class="comment">// Işığı SÖNDÜR</span>
+    }
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Unreal Engine sahnenize sol üstteki ekleme menüsünden <strong>Volumes -> Trigger Box</strong> (Tetikleyici Kutu) ekleyin ve oyun alanınıza yerleştirip biraz büyütün. Oyuncu bu görünmez kutunun içine girdiğinde Arduino'ya "1", çıktığında "0" yollayacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Olay (Event) Oluşturma:</strong> Sahnede seçtiğiniz Trigger Box'a sağ tıklayın. Açılan menüden <strong>Add Event -> Collision -> Add On Actor Begin Overlap</strong> (İçine girildiğinde) ve ardından aynı menüden <strong>Add On Actor End Overlap</strong> (İçinden çıkıldığında) düğümlerini Blueprint ekranınıza (Level Blueprint) ekleyin.</li>
+                
+                <li><strong>Veri Gönderme:</strong> <span class="bp-event">OnActorBeginOverlap</span> düğümünden kırmızı bir kablo çekin ve <span class="bp-func">Write String</span> (veya kullandığınız eklentiye göre <em>Print to Serial</em>) düğümünü bağlayın.
+                    <ul>
+                        <li><strong>Port:</strong> (Daha önce <code>ArduinoPort</code> değişkenine kaydettiğiniz port bağlantısını Target kısmına bağlayın).</li>
+                        <li><strong>String (Gönderilecek Yazı):</strong> Kutuya <code>1</code> yazın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Veri Kapatma:</strong> Aynı işlemi çıkış için yapalım. <span class="bp-event">OnActorEndOverlap</span> düğümünden kablo çekin ve yine <span class="bp-func">Write String</span> düğümünü bağlayın.
+                    <ul>
+                        <li><strong>String (Gönderilecek Yazı):</strong> Kutuya <code>0</code> yazın.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-success">
+                <strong>✨ Sonuç:</strong> Play (Oynat) tuşuna basın. Karakterinizi yürütüp görünmez Trigger Box alanının içine sokun. O an masanızdaki LED'in yandığını göreceksiniz. Kutudan dışarı çıkardığınızda LED anında sönecektir!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Geliştirme ve Hata Ayıklama</h2>
+            
+            <div class="alert-box alert-warning">
+                <strong>Gecikme (Lag) Varsa:</strong> Gelen veri gecikiyorsa, Unreal Engine Blueprint'inizdeki Write komutunun saniyede 60 kere (Tick üzerinden) çalışmadığına, sadece kutuya <strong>girildiği an (1 kez)</strong> çalıştığına (Overlap Event) emin olun. Aksi halde Serial Port dolar ve kilitlenir.
+            </div>
+
+            <p><strong>ARGE Ekibi İçin Meydan Okuma (Challenge):</strong></p>
+            <ul>
+                <li>Sadece LED yakmak yerine, bu pini bir <strong>Röle Modülüne</strong> bağlarsanız, karakteriniz Unreal'da belirli bir odanın şalterini indirdiğinde, sizin bulunduğunuz gerçek odanın lambasını söndürebilirsiniz!</li>
+                <li>Bu mantığı LED yerine bir Titreşim Motoruna (Rumble Motor) bağlarsanız, karakteriniz hasar aldığında (Apply Damage event'i tetiklendiğinde) masanız veya koltuğunuz fiziksel olarak titreyebilir.</li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+</html>

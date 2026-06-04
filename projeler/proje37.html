@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 37: Büyük Final - Dev Fiziksel Kaçış Odası</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --finale-gold: #ffd700; /* Büyük Final Altını */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #3a2e00 0%, #0b0c10 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--finale-gold);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--finale-gold); color: #000; border-color: var(--finale-gold); box-shadow: 0 0 15px var(--finale-gold); }
+
+        header h1 { font-size: 2.8rem; color: #ffffff; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        header p { color: var(--finale-gold); font-size: 1.2rem; font-weight: bold; letter-spacing: 1px; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            border-left: 5px solid var(--finale-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--finale-gold), transparent);
+            opacity: 0.5;
+        }
+
+        h2 { color: #ffffff; font-size: 1.8rem; margin-bottom: 20px; border-bottom: 1px solid #2a3644; padding-bottom: 10px; }
+        h3 { color: var(--finale-gold); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        .graduation-box { text-align: center; margin-top: 50px; padding: 40px 20px; background: rgba(255, 215, 0, 0.05); border: 2px dashed var(--finale-gold); border-radius: 12px; }
+        .graduation-box h2 { border: none; font-size: 2.2rem; color: var(--finale-gold); margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .graduation-box p { font-size: 1.2rem; color: #fff; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 37: Büyük Final</h1>
+                <p>Dev Fiziksel Kaçış Odası (Escape Room) Simülasyonu</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Siber-Fiziksel Ekosistem</h2>
+            <p>Bir "Kaçış Odası" (Escape Room) hayal edin. Oyuncular odaya girer ve süre başlar. Masadaki fiziksel lazer modüllerini (Proje 18) doğru aynalara yansıtıp sensörleri tetiklediklerinde, Unreal Engine'deki dijital sandık açılır ve ekranda bir şifre belirir. Bu şifreyi ESP32 Web Server arayüzüne (Proje 23) girdiklerinde oyun motoru DMX sahne ışıklarını (Proje 33) yeşile çevirir.</p>
+            <p>Bu projede Unreal Engine sadece bir oyun değil, odanın <strong>Merkezi Beynidir (Game Master)</strong>. Unreal, tüm sensörlerden gelen "Bulmaca Çözüldü" (Puzzle Solved) sinyallerini toplayacak, süre bittiğinde veya oyuncular kazandığında gerçek dünyadaki laboratuvar kapısının manyetik kilidini (Maglock) açacak olan ESP32'ye nihai "KAPIYI_AC" komutunu gönderecektir.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Nihai Kilit (Maglock Kontrolörü)</h2>
+            <p>Atölyenin kapısına veya dev bir sandığa bir Manyetik Kilit (Maglock) bağladığımızı varsayalım. Bu kilidi kontrol etmek için, Proje 24'te öğrendiğimiz "Röle" sistemini kullanacağız. Bu ESP32, sadece Unreal Engine'den gelecek o tek ve kritik UDP komutunu dinler.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Merkezi Kilit (Kaçış Odası Çıkış Kapısı)</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+
+<span class="comment">// Manyetik kilidi veya elektronik grev (strike) kilidi kontrol eden Röle Pini</span>
+<span class="keyword">const int</span> relayPin = 5; 
+
+WiFiUDP udp;
+<span class="keyword">const int</span> dinlemePortu = 8888; 
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  pinMode(relayPin, OUTPUT);
+  
+  <span class="comment">// Güvenlik için başlangıçta kilit KAPALI (Röle çekili)</span>
+  digitalWrite(relayPin, HIGH); 
+
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+  
+  udp.begin(dinlemePortu);
+  Serial.println(<span class="string">"Kilit Modülü Hazır. UE5'ten Komut Bekleniyor..."</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">int</span> packetSize = udp.parsePacket();
+  <span class="keyword">if</span> (packetSize) {
+    <span class="keyword">char</span> gelenVeri[255];
+    <span class="keyword">int</span> len = udp.read(gelenVeri, 255);
+    <span class="keyword">if</span> (len > 0) gelenVeri[len] = 0; <span class="comment">// Metin sonlandırıcı</span>
+    
+    String komut = String(gelenVeri);
+    komut.trim();
+
+    <span class="comment">// Unreal Engine'den Zafer Komutu Geldi mi?</span>
+    <span class="keyword">if</span> (komut == <span class="string">"KACIS_BASARILI"</span>) {
+      Serial.println(<span class="string">"OYUN BİTTİ! KAPI AÇILIYOR!"</span>);
+      
+      <span class="comment">// Röleyi bırak, manyetik kilidin gücünü kes ve kapıyı aç!</span>
+      digitalWrite(relayPin, LOW); 
+      
+      <span class="comment">// 10 Saniye kapıyı açık tut, sonra geri kilitle</span>
+      delay(10000);
+      digitalWrite(relayPin, HIGH);
+    }
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Game Master Mantığı</h2>
+            <p>Unreal Engine tarafında bir "State Machine" (Durum Makinesi) kuruyoruz. Odadaki 3 farklı bulmacadan (Örn: Lazer, RFID ve Şifre) ESP32'ler aracılığıyla ayrı ayrı onay gelmesi gerekmektedir.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar (Mantık Devresi):</h3>
+            <ol>
+                <li><strong>Bulmaca Değişkenleri:</strong> Level Blueprint içinde 3 adet Boolean (True/False) değişken oluşturun: <code>Bulmaca1_Cozuldu</code>, <code>Bulmaca2_Cozuldu</code>, <code>Bulmaca3_Cozuldu</code>. Başlangıçta hepsi False olmalıdır.</li>
+                
+                <li><strong>Ağ Dinleyicisi (Dispatcher):</strong> <span class="bp-event">Event On UDP Message Received</span> düğümünü <span class="bp-func">Switch on String</span> düğümüne bağlayın.
+                    <ul>
+                        <li>Pinler: <code>PUZZLE_1_OK</code>, <code>PUZZLE_2_OK</code>, <code>PUZZLE_3_OK</code>.</li>
+                        <li>Hangi komut gelirse, ona ait Boolean değişkenini <span class="bp-func">Set</span> düğümü ile <strong>True</strong> yapın.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Büyük Zafer Kontrolü (AND Gate):</strong> Her bir bulmaca çözüldüğünde çalışan bir Custom Event (Örn: <code>ZaferKontrolu</code>) tetikleyin.
+                    <ul>
+                        <li>Bu Event çalıştığında, 3 Boolean değişkenini alıp birbiriyle <span class="bp-pure">AND (Boolean)</span> düğümleriyle birleştirin. (Yani Bulmaca 1 VE Bulmaca 2 VE Bulmaca 3 True mu?)</li>
+                        <li>Sonucu bir <span class="bp-flow">Branch</span>'e bağlayın.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Kapıyı Aç (Send UDP):</strong> Branch True verirse (Tüm bulmacalar çözüldüyse);
+                    <ul>
+                        <li><span class="bp-func">Play Sound 2D</span> ile Epik bir zafer müziği çalın.</li>
+                        <li><span class="bp-func">Send DMX</span> ile fiziksel laboratuvardaki tüm ışıkları Zümrüt Yeşiline (Green: 255) çevirin.</li>
+                        <li>Ve en önemlisi, ağ eklentinizdeki <span class="bp-func">Send UDP Message</span> düğümünü kullanarak, kapıdaki ESP32'nin IP adresine <code>KACIS_BASARILI</code> komutunu fırlatın! Kapı fiziksel olarak açılacaktır.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Sistem Mimarları İş Başında</h2>
+            <p>ekibinizle birbirinden bağımsız onlarca teknoloji geliştirdiniz. Şimdi <strong>Rol Dağılımı</strong> vakti:</p>
+            <ul>
+                <li><strong>Donanım Ekibi:</strong> Sensörleri, röleleri ve manyetik kilitleri atölyeye gizlesin, kablolama ve lehimleri yapsın.</li>
+                <li><strong>Network (Ağ) Ekibi:</strong> Tüm cihazların IP adreslerini statiklesin, Nmap ile güvenliği sağlasın ve UDP/ArtNet iletişiminin kesintisiz çalışmasını garanti altına alsın.</li>
+                <li><strong>Unreal (Yazılım) Ekibi:</strong> Merkezi "Game Master" Blueprint'ini, ekrandaki geri sayım arayüzünü (UMG) ve sinematografik geçişleri yönetsin.</li>
+            </ul>
+            <p>Hepsi bir araya geldiğinde laboratuvarınız, sadece oyun oynanan değil; geleceğin otonom fabrikalarının, akıllı evlerinin ve medikal sistemlerinin prototiplendiği devasa bir <strong>Simülasyon Kurumuna</strong> dönüşmüş olacaktır.</p>
+        </div>
+
+        <div class="graduation-box">
+            <h2>MÜFREDAT TAMAMLANDI!</h2>
+            <p>Kabloları bağlamaktan, veri paketleri uçurmaya; sanal ışıkları yönetmekten, zihin gücüyle oynamaya kadar uzanan 38 Projelik bu devasa eğitim yolculuğunu başarıyla noktaladınız.<br><br>Artık kod yazan veya oyun oynayan değil; <strong>Fiziksel ve Dijital Dünyaları Birleştiren Sistem Mimarlarısınız!</strong></p>
+        </div>
+
+    </div>
+
+</body>
+</html>

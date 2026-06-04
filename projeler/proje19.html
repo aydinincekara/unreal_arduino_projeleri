@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 19: Taktiksel Seçim - Unreal Engine & Rotary Encoder</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level3: #2ecc71; /* Seviye 3 Yeşili */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #0b1f15 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level3);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level3); color: #000; border-color: var(--level3); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level3); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level3);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level3); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 19: Taktiksel Seçim</h1>
+                <p>Rotary Encoder ile UMG Silah Tekerleği (Weapon Wheel) Yönetimi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Envanteri Döndürmek</h2>
+            <p>Oyunlarda karakterin silahlarını veya eşyalarını hızlıca seçmesini sağlayan dairesel menülere "Weapon Wheel" (Silah Tekerleği) denir. Normalde bu işlem farenin tekerleği (Scroll) ile yapılır.</p>
+            <p>Bu projede sonsuz dönebilen fiziksel bir Enkoder (KY-040) kullanarak, bu dijital tekerleği fiziksel olarak çevireceğiz. Üstelik menüde istediğimiz silahın üzerine geldiğimizde, enkoderin üzerine tıklayarak (buton özelliği) o silahı doğrudan kuşanacağız.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: KY-040 Rotary Encoder</h2>
+            <p>Rotary Encoder'lar potansiyometrelere benzer ama sınırları yoktur, sonsuza kadar dönerler ve her bir "tık" hareketinde dijital sinyal üretirler. Modülün <code>CLK</code> pinini Dijital 2'ye, <code>DT</code> pinini Dijital 3'e, <code>SW</code> (Buton) pinini ise Dijital 4'e bağlayalım. VCC 5V'a, GND GND'ye gider.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Yön ve Tıklama Algılama</span>
+<span class="keyword">const int</span> clkPin = 2;
+<span class="keyword">const int</span> dtPin = 3;
+<span class="keyword">const int</span> swPin = 4;
+
+<span class="keyword">int</span> sonClkDurumu;
+<span class="keyword">int</span> simdikiClkDurumu;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  pinMode(clkPin, INPUT);
+  pinMode(dtPin, INPUT);
+  pinMode(swPin, INPUT_PULLUP); <span class="comment">// Buton için dahili direnç</span>
+  
+  sonClkDurumu = digitalRead(clkPin);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Düğmenin dönüp dönmediğini kontrol et</span>
+  simdikiClkDurumu = digitalRead(clkPin);
+  
+  <span class="keyword">if</span> (simdikiClkDurumu != sonClkDurumu && simdikiClkDurumu == 1) {
+    <span class="comment">// DT pini farklıysa SAĞA dönmüştür</span>
+    <span class="keyword">if</span> (digitalRead(dtPin) != simdikiClkDurumu) {
+      Serial.println(<span class="string">"NEXT"</span>); <span class="comment">// Sonraki Silah</span>
+    } 
+    <span class="comment">// DT pini aynıysa SOLA dönmüştür</span>
+    <span class="keyword">else</span> {
+      Serial.println(<span class="string">"PREV"</span>); <span class="comment">// Önceki Silah</span>
+    }
+  }
+  
+  sonClkDurumu = simdikiClkDurumu;
+
+  <span class="comment">// Üzerine tıklandı mı? (Seçimi Onayla)</span>
+  <span class="keyword">if</span> (digitalRead(swPin) == LOW) {
+    Serial.println(<span class="string">"SELECT"</span>);
+    delay(300); <span class="comment">// Buton sekmesini engelle</span>
+  }
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Enkoder Mantığı (A ve B Fazı):</strong> Enkoderler içlerinde iki farklı iletken tarak barındırır. Sağa dönerken önce A (CLK), sonra B (DT) temas eder. Sola dönerken tam tersi olur. Kodumuzdaki mantık, "Hangisi önce temas etti?" sorusunun cevabıdır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Unreal Engine tarafında <code>SeciliSilahIndex</code> adında bir Integer (Tam sayı) değişkenine ihtiyacımız var. (Örn: 0: Tabanca, 1: Tüfek, 2: Pompalı, 3: Bıçak).</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Gelen Yönü Ayıklamak:</strong> <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> ile okunan metni <span class="bp-pure">Trim</span> yapıp <span class="bp-flow">Switch on String</span> düğümüne bağlayın. (Pinler: <code>NEXT</code>, <code>PREV</code>, <code>SELECT</code>).</li>
+                
+                <li><strong>Silah İndeksini Değiştirmek:</strong>
+                    <ul>
+                        <li><strong>NEXT (Sağ):</strong> <code>SeciliSilahIndex</code> değişkenini alın, <span class="bp-pure">Add (+)</span> düğümüyle 1 artırın. Eğer sayı 3'ü geçerse (Sadece 4 silahımız var), tekrar 0'a döndürmek için bir <span class="bp-flow">Branch</span> ekleyin.</li>
+                        <li><strong>PREV (Sol):</strong> <code>SeciliSilahIndex</code> değişkenini alın, <span class="bp-pure">Subtract (-)</span> düğümüyle 1 eksiltin. Eğer sayı 0'ın altına (-1) düşerse, en sonuncu silaha (3) eşitleyin.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>UI (Arayüz) Güncellemesi:</strong> İndeks her değiştiğinde ekrandaki Widget'a haber gönderin (Örn: Seçili silahın resmini büyüt veya etrafını parlat).
+                </li>
+
+                <li><strong>Seçimi Onaylamak:</strong> <code>SELECT</code> pininden kablo çekin. <span class="bp-flow">Switch on Int</span> düğümünü kullanarak <code>SeciliSilahIndex</code> değerine göre karakterin elindeki silah modelini (Static Mesh) değiştirin!</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Dairesel Menü Mantığı:</strong> İndekslerin 0'ın altına düşünce sona gitmesi ve sonu geçince başa dönmesi işlemine "Dairesel Limit (Wrap Around)" denir. Profesyonel UI tasarımcılarının tekerlekli menülerde en çok kullandığı matematiksel fonksiyondur.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Araç Telsiz Frekansı</h2>
+            <p>Bu mekaniği sadece silah seçimi için kullanmak zorunda değilsiniz. Atölyedeki gençlerden oyun içine bir araba eklemelerini isteyin.</p>
+            <p>Bu enkoder modülü arabanın içindeyken <strong>Radyo Kanalı</strong> seçicisi olarak çalışsın. Sağa sola çevirdikçe ekranda frekanslar (88.0, 92.4 vb.) değişsin ve her frekansta Unreal Engine içerisinden farklı bir <code>Audio Component</code> müzik parçası çalmaya başlasın!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

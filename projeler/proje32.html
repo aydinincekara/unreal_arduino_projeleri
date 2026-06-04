@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 32: Büyük Final - EEG ve Telekinezi</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --finale-color: #00d2ff; /* Beyin Dalgaları / Kozmik Mavi */
+            --level5: #e74c3c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.7; padding-bottom: 60px; }
+        header { background: linear-gradient(180deg, #001f33 0%, #0b0c10 100%); padding: 60px 20px; text-align: center; border-bottom: 4px solid var(--finale-color); box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2); }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .section-card { background-color: var(--card-bg); border-radius: 8px; padding: 35px; margin-bottom: 40px; border-left: 5px solid var(--finale-color); position: relative; }
+        h2 { color: #ffffff; font-size: 1.8rem; margin-bottom: 20px; border-bottom: 1px solid #2a3644; padding-bottom: 10px; }
+        .code-wrapper { background-color: #06080a; border-radius: 6px; padding: 20px; margin: 15px 0; overflow-x: auto; }
+        pre { font-family: 'Consolas', monospace; color: #e2e8f0; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); padding: 4px 10px; border-radius: 12px; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Proje 32: Büyük Final</h1>
+        <p>Beyin Bilgisayar Arayüzü (BCI) ile Sanal Gerçeklikte Telekinezi</p>
+    </header>
+
+    <div class="container">
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sadece Düşünerek Oynamak</h2>
+            <p>Donanım geliştirmenin en ileri noktası olan Beyin-Bilgisayar Arayüzleri (BCI), medikal araştırmalardan oyun sektörüne kadar devrim yaratıyor. Kullanıcı zihnini boşaltıp tamamen ekrandaki nesneye odaklandığında (Attention seviyesi arttığında), Unreal Engine bu nörolojik veriyi alacak ve fizik motorunu manipüle ederek objeyi yerçekimine karşı koyarak havaya kaldıracaktır!</p>
+            
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Bluetooth ve Beyin Dalgaları</h2>
+            <p>NeuroSky MindWave cihazı, verilerini Bluetooth üzerinden iletir. Arduino'ya bir HC-05 Bluetooth modülü bağlayarak (RX->TX, TX->RX) kulaklık ile Arduino'yu eşleştirmemiz gerekir. Arduino IDE'de <code>Brain</code> kütüphanesini kullanarak bu veriyi işliyoruz.</p>
+            <div class="code-wrapper">
+<pre>#include &lt;SoftwareSerial.h&gt;
+#include &lt;Brain.h&gt;
+
+SoftwareSerial btSerial(10, 11); <span class="comment">// HC-05 Modülü</span>
+Brain brain(btSerial);
+
+void setup() {
+  Serial.begin(9600); <span class="comment">// Unreal ile haberleşme</span>
+  btSerial.begin(57600); <span class="comment">// NeuroSky Baud Rate</span>
+}
+
+void loop() {
+  if (brain.update()) {
+    int odakSeviyesi = brain.readAttention();
+    if (odakSeviyesi > 0) {
+      Serial.print("FOCUS,");
+      Serial.println(odakSeviyesi);
+    }
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Telekinezi Mekaniği</h2>
+            <ol>
+                <li><span class="bp-func">Event Tick</span> üzerinden gelen veriyi <span class="bp-func">Parse Into Array</span> ile ayırın.</li>
+                <li><span class="bp-func">Map Range Clamped</span> ile 40-100 arası odaklanma değerini, 0-50000 arası bir "Z Ekseni Kuvveti"ne dönüştürün.</li>
+                <li>Sahnedeki objenize <span class="bp-func">Add Force</span> düğümünü bağlayın.</li>
+                <li><em>Accel Change</em> (Kütleyi Yoksay) seçeneğini işaretleyerek objenin kütlesinden bağımsız olarak havaya kalkmasını sağlayın.</li>
+            </ol>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Jedi / Matrix Antrenmanı</h2>
+            <p>Sahnede karanlık bir mağara veya bilim kurgu laboratuvarı tasarlayın. Öğrencileri sırayla sandalyeye oturtun. Derin bir nefes alıp ekrandaki kayaya odaklanmalarını isteyin. Kaya titreyerek yerden kesildiğinde ve odaklanma zirveye ulaştığında havada asılı kaldığında salonda kopacak alkışlar, bu sarmal müfredatın neden bu kadar değerli olduğunun ispatıdır!</p>
+        </div>
+    </div>
+</body>
+</html>

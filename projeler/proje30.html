@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 30: Yapay Zeka Gözü - ESP32-CAM ve Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level5: #e74c3c; /* Seviye 5 Kırmızı (AI/BCI) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #2e0b0b 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level5);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level5); color: #fff; border-color: var(--level5); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level5); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level5);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level5); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-var { background: linear-gradient(180deg, #c0392b 0%, #922b21 100%); border-color: #e74c3c; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 30: Yapay Zeka Gözü</h1>
+                <p>ESP32-CAM ile Sanal Güvenlik Kameraları ve Gerçek Zamanlı Video Akışı</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sanal Kontrol Odası (Command Center)</h2>
+            <p>Metaverse ve Digital Twin (Dijital İkiz) projelerinin zirvesinde, fiziksel dünyanın görsel kopyasını sanal dünyaya aktarmak yatar. Sevilen oyun serilerinden "Five Nights at Freddy's (FNAF)" veya askeri drone simülasyonlarındaki kamera mekaniğini fiziksel donanımla gerçeğe dönüştürüyoruz.</p>
+            <p>Atölyenin bir köşesine yerleştirdiğiniz ESP32-CAM, saniyede 30 kare (30 FPS) video çekecek ve Wi-Fi üzerinden yayınlayacak. Oyuncu, Unreal Engine içindeki güvenlik odasında bulunan 3D monitöre yaklaştığında, gerçek laboratuvarın o anki görüntüsünü sanki oyunun içindeymiş gibi izleyecek!</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Kamera Sunucusu (MJPEG Stream)</h2>
+            <p>ESP32-CAM modüllerinin üzerinde doğrudan bir USB girişi bulunmaz. Kodu yüklemek için bir <strong>FTDI (USB to TTL) Programlayıcı</strong> kullanmalısınız (U0R->TX, U0T->RX, 5V->5V, GND->GND ve yükleme sırasında GPIO0->GND). Arduino IDE'den hazır gelen <code>CameraWebServer</code> örneğini biraz sadeleştirerek kullanacağız.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32-CAM KODU: Canlı Video Akışı (Stream) Başlatma</span>
+#include "esp_camera.h"
+#include &lt;WiFi.h&gt;
+
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+
+<span class="comment">// AI Thinker ESP32-CAM Pin Tanımlamaları</span>
+#define PWDN_GPIO_NUM     32
+#define RESET_GPIO_NUM    -1
+#define XCLK_GPIO_NUM      0
+#define SIOD_GPIO_NUM     26
+#define SIOC_GPIO_NUM     27
+#define Y9_GPIO_NUM       35
+#define Y8_GPIO_NUM       34
+#define Y7_GPIO_NUM       39
+#define Y6_GPIO_NUM       36
+#define Y5_GPIO_NUM       21
+#define Y4_GPIO_NUM       19
+#define Y3_GPIO_NUM       18
+#define Y2_GPIO_NUM        5
+#define VSYNC_GPIO_NUM    25
+#define HREF_GPIO_NUM     23
+#define PCLK_GPIO_NUM     22
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+
+  <span class="comment">// Kamera Ayarları</span>
+  camera_config_t config;
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.ledc_timer = LEDC_TIMER_0;
+  config.pin_d0 = Y2_GPIO_NUM; config.pin_d1 = Y3_GPIO_NUM;
+  config.pin_d2 = Y4_GPIO_NUM; config.pin_d3 = Y5_GPIO_NUM;
+  config.pin_d4 = Y6_GPIO_NUM; config.pin_d5 = Y7_GPIO_NUM;
+  config.pin_d6 = Y8_GPIO_NUM; config.pin_d7 = Y9_GPIO_NUM;
+  config.pin_xclk = XCLK_GPIO_NUM; config.pin_pclk = PCLK_GPIO_NUM;
+  config.pin_vsync = VSYNC_GPIO_NUM; config.pin_href = HREF_GPIO_NUM;
+  config.pin_sccb_sda = SIOD_GPIO_NUM; config.pin_sccb_scl = SIOC_GPIO_NUM;
+  config.pin_pwdn = PWDN_GPIO_NUM; config.pin_reset = RESET_GPIO_NUM;
+  config.xclk_freq_hz = 20000000;
+  config.pixel_format = PIXFORMAT_JPEG; 
+  config.frame_size = FRAMESIZE_VGA; <span class="comment">// VGA Çözünürlük (640x480)</span>
+  config.jpeg_quality = 12;
+  config.fb_count = 2;
+
+  <span class="comment">// Kamerayı Başlat</span>
+  esp_err_t err = esp_camera_init(&config);
+  <span class="keyword">if</span> (err != ESP_OK) { Serial.println(<span class="string">"Kamera Başarısız!"</span>); <span class="keyword">return</span>; }
+
+  <span class="comment">// Wi-Fi'ye Bağlan</span>
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+  
+  <span class="comment">// IP Adresini Yazdır</span>
+  Serial.print(<span class="string">"Kamera Yayını Başladı! URL: http://"</span>);
+  Serial.print(WiFi.localIP());
+  Serial.println(<span class="string">":81/stream"</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Sunucu arka planda çalışmaya devam eder</span>
+  delay(10000);
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ URL Yapısı:</strong> ESP32-CAM'in standart video akış portu genelde <code>81</code>'dir. Unreal Engine'de kullanacağımız adres <code>http://192.168.1.55:81/stream</code> formatında olmalıdır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Unreal Engine Medya Oynatıcı (Media Player)</h2>
+            <p>Bu projede veri almak yerine Unreal Engine'in harika özelliklerinden biri olan <strong>Media Framework</strong> sistemini kullanacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Medya Altyapısını Kurmak:</strong> 
+                    <ul>
+                        <li>İçerik çekmecesinde (Content Drawer) sağ tıklayın ve <strong>Media -> Media Player</strong> oluşturun (Adı: <em>ESP_Camera_Player</em>).</li>
+                        <li>Oluştururken çıkan kutucukta <em>"Video output Media Texture asset"</em> seçeneğini işaretleyin. Bu sayede videoyu gösterecek doku (Texture) otomatik oluşur.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Televizyonu / Monitörü Kaplamak:</strong>
+                    <ul>
+                        <li>Oluşan <em>Media Texture</em> dosyasına sağ tıklayıp <strong>Create Material</strong> deyin. </li>
+                        <li>Sahnede bulunan bir televizyon veya küp (Static Mesh) modelinin üzerine bu Materyali sürükleyip bırakın. Monitörünüzün ekranı siyah olacaktır.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Yayını Başlatmak (Blueprint):</strong>
+                    <ul>
+                        <li>Level Blueprint'i açın. <span class="bp-event">Event BeginPlay</span> düğümünü çağırın.</li>
+                        <li>İçerik çekmecesindeki <em>ESP_Camera_Player</em> dosyasını sahneye sürükleyerek referansını alın.</li>
+                        <li>O referanstan bir kablo uzatın ve <span class="bp-func">Open URL</span> düğümünü çağırın.</li>
+                        <li><strong>URL</strong> kutucuğuna Arduino ekranında gördüğünüz adresi (Örn: <code>http://192.168.1.55:81/stream</code>) tam ve eksiksiz olarak yazın!</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Electra Player Eklentisi:</strong> Unreal Engine 5'te ağ akışlarını (Network Stream) sorunsuz açabilmek için <em>Edit -> Plugins</em> menüsünden <strong>Electra Player</strong> eklentisini aktif etmeniz performansınızı ciddi oranda artıracaktır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: İnsansız Kara Aracı (İKA) Entegrasyonu</h2>
+            <p>ARGE ekibiniz için mükemmel bir simülasyon görevi: Proje 8'de yaptığımız fiziksel Joystick ile Chaos Vehicles kontrolü altyapısını hatırlayın.</p>
+            <p>ESP32-CAM modülünü ve küçük bir güç kaynağını (Powerbank) uzaktan kumandalı (RC) bir arabanın üzerine bantlayın. Gençler laboratuvarın içinde RC arabayı sürerken, arabanın kamerasından gelen görüntüyü Unreal Engine'deki kontrol odası ekranından canlı olarak izlesinler! Bu, endüstriyel insansız kara araçları (İKA) ve drone (İHA) kontrol istasyonlarının birebir aynı mimarisidir.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

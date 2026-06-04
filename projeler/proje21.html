@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 21: Kablolara Veda - ESP32 ve UDP İletişimi</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Siber) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 21: Kablolara Veda</h1>
+                <p>ESP32 ve UDP Protokolü ile Wi-Fi Üzerinden Unreal Engine İletişimi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sınırları Kaldırmak</h2>
+            <p>Bugüne kadar yaptığımız tüm projelerde Arduino'yu bilgisayarımıza bir USB kablosuyla (Seri Port) bağlamak zorundaydık. Ancak gerçekçi bir VR (Sanal Gerçeklik) simülatörü veya hareketli bir Escape Room (Kaçış Odası) tasarlarken kablolar en büyük düşmanımızdır.</p>
+            
+            <p>Bu projede, bilgisayarımızla aynı Wi-Fi ağına bağlı bir <strong>ESP32</strong> kullanacağız. ESP32, üzerindeki bir butona basıldığında yerel ağ üzerinden (Modem aracılığıyla) bilgisayarımızın IP adresine <strong>UDP (User Datagram Protocol)</strong> paketi gönderecek. Unreal Engine bu paketi havadan yakalayıp oyundaki bir olayı tetikleyecek!</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: ESP32 Wi-Fi ve UDP Kodlaması</h2>
+            <p>ESP32'nin gücü dahili Wi-Fi anteninde yatar. Test etmek için ESP32'nin <strong>Dijital 4</strong> numaralı pinine basit bir buton bağlayın (Diğer bacağı GND'ye).</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: UDP Üzerinden Unreal'a Veri Gönderme</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="comment">// Wi-Fi Ağ Bilgileriniz (Laboratuvardaki modem)</span>
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+
+<span class="comment">// Unreal Engine Çalışan Bilgisayarın Yerel IP Adresi (CMD -> ipconfig)</span>
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>; 
+<span class="keyword">const int</span> unrealPort = 8888; <span class="comment">// Veriyi göndereceğimiz Port</span>
+
+WiFiUDP udp;
+<span class="keyword">const int</span> butonPin = 4;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  pinMode(butonPin, INPUT_PULLUP);
+
+  <span class="comment">// Wi-Fi'ye Bağlan</span>
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(<span class="string">"."</span>);
+  }
+  Serial.println(<span class="string">"\nWiFi Baglandi!"</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Butona basıldıysa</span>
+  <span class="keyword">if</span> (digitalRead(butonPin) == LOW) {
+    
+    <span class="comment">// UDP Paketini Hazırla ve Bilgisayara Gönder</span>
+    udp.beginPacket(unrealIP, unrealPort);
+    udp.print(<span class="string">"KABLOSUZ_TETIK"</span>);
+    udp.endPacket();
+    
+    Serial.println(<span class="string">"UDP Paketi Gonderildi!"</span>);
+    delay(300); <span class="comment">// Debounce (Spam koruması)</span>
+  }
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-warning">
+                <strong>💡 TCP mi, UDP mi?:</strong> Web siteleri eksiksiz veri indirmek için TCP kullanır. Ancak oyun motorları "Hız ve Düşük Gecikme (Low Ping)" için UDP kullanır. UDP paketleri hedefe ulaştı mı diye kontrol etmez, sadece fırlatır! Bu yüzden oyunlarda lag olmaz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) UDP Dinleyicisi</h2>
+            <p>Unreal Engine'in standart sürümünde UDP dinlemek için genellikle ücretsiz Marketplace eklentileri (Örn: <em>Socketeter</em> veya <em>UDP Messaging</em>) kullanılır. En popüler ücretsiz Socket eklentilerinden birini kurduğunuzu varsayarak (veya yerleşik OSC pluginini kullanarak) portu nasıl dinleyeceğimizi görelim.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar (Örnek UDP Eklentisi Mantığı):</h3>
+            <ol>
+                <li><strong>Soketi Başlatmak:</strong> Oyun başladığında (<span class="bp-event">Event BeginPlay</span>), <span class="bp-func">Bind UDP Socket</span> veya <span class="bp-func">Create UDP Server</span> düğümünü çağırın. 
+                    <ul>
+                        <li><strong>Port:</strong> ESP32'de belirlediğimiz <code>8888</code> numarasını yazın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Veriyi Havada Yakalamak:</strong> Soket başarıyla açıldıysa, eklentinin size sağladığı <span class="bp-event">Event On Message Received</span> (veya On Data Received) olayını Blueprint ekranınıza ekleyin. (Bu, Event Tick kullanmaktan çok daha performanslıdır, sadece veri geldiğinde çalışır).</li>
+                
+                <li><strong>Metne Çevirme:</strong> Ağ üzerinden gelen veriler genellikle "Byte Array" (0'lar ve 1'ler kümesi) olarak gelir. Bunu <span class="bp-pure">Bytes to String</span> düğümü ile okunabilir metne çevirin.</li>
+
+                <li><strong>Tetikleme:</strong> Çıkan String değerini <span class="bp-pure">Equal (==)</span> düğümü ile <code>KABLOSUZ_TETIK</code> metnine eşitleyip bir <span class="bp-flow">Branch</span>'e bağlayın. Şart sağlandığında, karakterinizi zıplatabilir, bir havai fişek patlatabilir veya kapı açabilirsiniz!</li>
+            </ol>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Sınıfın Öbür Ucundan Oynamak</h2>
+            <p>ARGE ekibiniz ESP32'yi bir Powerbank'e (Taşınabilir Batarya) bağlasın. Bilgisayarla hiçbir fiziksel bağlantıları kalmadığında, laboratuvarın öbür ucuna (hatta koridora) gidip butona basarak Unreal Engine'deki karakteri kablosuz olarak kontrol etmenin büyüsünü yaşasınlar.</p>
+            <p>Bu altyapı, ileride kuracağımız devasa Laser Tag (Lazer Savaşları) veya etkileşimli müze projelerinin omurgasını oluşturacaktır.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

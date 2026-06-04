@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 33: Sanal Prodüksiyon - DMX Işık Kontrolü</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level6: #f1c40f; /* Seviye 6 Altın/Sarı (Prodüksiyon/Final) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #332a00 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level6);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level6); color: #000; border-color: var(--level6); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level6); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level6);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level6); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-struct { background: linear-gradient(180deg, #2980b9 0%, #1f618d 100%); border-color: #3498db; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 33: DMX Işık Kontrolü</h1>
+                <p>Unreal Engine ile Fiziksel Sahne Işıklarını (Art-Net) Yönetmek</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Oyun Dünyasının Gerçek Işıkları</h2>
+            <p>Konserlerde, tiyatrolarda ve modern sinema stüdyolarında ışıklar **DMX512** adı verilen endüstriyel bir protokolle yönetilir. Unreal Engine 5, yerleşik DMX eklentisi sayesinde bir "Işık Şefi Masası" gibi çalışabilir.</p>
+            <p>Sanal dünyamızda polis arabasının tepe lambaları yanıp söndüğünde, veya oyuncu kırmızı bir lav havuzunun yanından geçtiğinde, atölyenizin köşesine kurduğunuz devasa RGB Par LED spot ışıkları da Wi-Fi üzerinden (Art-Net protokolüyle) anında aynı renge bürünecektir. ESP32'yi kullanarak on binlerce dolarlık ticari DMX Node cihazlarının kendi donanımsal alternatifimizi üreteceğiz.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: MAX485 Entegresi ve Art-Net</h2>
+            <p>DMX sinyali donanımsal olarak RS485 standardını kullanır. ESP32'nin TX (Gönderim) pinini bir <strong>MAX485 / RS485 Modülü</strong>ne bağlayarak 3.3V'luk sinyali tiyatro ışıklarının anlayacağı endüstriyel diferansiyel sinyale çevireceğiz. MAX485'in A ve B uçları (Data+ ve Data-), sahne ışığının XLR soketine girecektir.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Art-Net Node (Wi-Fi'den DMX Sinyaline Çevirici)</span>
+#include &lt;WiFi.h&gt;
+#include &lt;ArtnetWifi.h&gt; <span class="comment">// Art-Net Kütüphanesi</span>
+#include &lt;LXESP32DMX.h&gt; <span class="comment">// ESP32 DMX Kütüphanesi</span>
+
+<span class="comment">// Ağ Ayarları</span>
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+
+ArtnetWifi artnet;
+<span class="keyword">const int</span> dmxTxPin = 17; <span class="comment">// MAX485 Modülünün DI (Data In) Pinine</span>
+
+<span class="comment">// ArtNet paketi geldiğinde tetiklenecek fonksiyon</span>
+<span class="keyword">void</span> onDmxFrame(<span class="keyword">uint16_t</span> universe, <span class="keyword">uint16_t</span> length, <span class="keyword">uint8_t</span> sequence, <span class="keyword">uint8_t</span>* data) {
+  <span class="comment">// Gelen 512 kanallı veriyi donanımsal DMX çıkışına yaz</span>
+  <span class="keyword">for</span> (<span class="keyword">int</span> i = 0; i < length; i++) {
+    ESP32DMX.setSlot(i + 1, data[i]);
+  }
+}
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+  
+  <span class="comment">// DMX Gönderimini Başlat (TX Pin 17)</span>
+  ESP32DMX.startOutput(dmxTxPin);
+
+  <span class="comment">// Art-Net dinleyiciyi başlat ve gelen paketi onDmxFrame'e yönlendir</span>
+  artnet.begin();
+  artnet.setArtDmxCallback(onDmxFrame);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Wi-Fi üzerinden sürekli Art-Net paketlerini dinle</span>
+  artnet.read();
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Art-Net Nedir?:</strong> DMX kablosunu IP paketlerinin (Wi-Fi veya LAN) içine saran evrensel bir protokoldür. Unreal Engine doğrudan kabloyla DMX gönderemez; Art-Net (UDP IP) olarak ağa fırlatır, bizim kurduğumuz ESP32 düğümü (Node) bu ağ paketini yakalayıp gerçek kablolu DMX sinyaline dönüştürür.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Unreal Engine DMX Entegrasyonu</h2>
+            <p>Motor ayarlarından <strong>DMX Engine</strong> ve <strong>DMX Protocol</strong> eklentilerini (Plugins) aktif edip motoru yeniden başlatın.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Kurulum:</h3>
+            <ol>
+                <li><strong>DMX Library Oluşturma:</strong> İçerik çekmecesinde sağ tıklayıp <em>DMX -> DMX Library</em> oluşturun.
+                    <ul>
+                        <li><strong>Fixtures (Cihazlar):</strong> Kütüphanenin içine girip fiziksel ışığınızın özelliklerini (Örn: 3 Kanallı - Kırmızı, Yeşil, Mavi) tanımlayan bir "Fixture Type" oluşturun.</li>
+                        <li><strong>Patching (Adresleme):</strong> Bu ışığı "Universe 1, Channel 1" adresine yamalayın (Patch).</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Protokol Ayarları:</strong> Proje ayarlarında (Project Settings) <em>DMX Plugin</em> sekmesini bulun. Output Port (Çıkış Portu) oluşturun ve protokolü <strong>Art-Net</strong> seçip Hedef IP adresi olarak ESP32'nizin IP adresini girin.</li>
+
+                <li><strong>Blueprint ile Sinyal Göndermek:</strong>
+                    <ul>
+                        <li>Level Blueprint'i açın. <span class="bp-event">Event Tick</span> veya bir Buton tetikleyicisi kullanın.</li>
+                        <li><span class="bp-func">Send DMX</span> düğümünü çağırın.</li>
+                        <li><em>DMX Library</em> pinine oluşturduğunuz kütüphaneyi seçin.</li>
+                        <li><em>Fixture Patch</em> pinine ışığınızı seçin.</li>
+                        <li><span class="bp-struct">Make DMX Attribute Values</span> düğümü ile Renk/Parlaklık (Örn: Red: 255, Green: 0, Blue: 0) değerlerini girin.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Pixel Mapping:</strong> Unreal Engine'de tek tek renk yazmak yerine "Pixel Mapping" özelliğini kullanabilirsiniz. Ekrana bir kamera veya kutu koyduğunuzda, Unreal o kutunun içindeki oyun dünyası piksellerini analiz edip o anki ortam rengini otomatik olarak DMX üzerinden fiziksel ışıklara gönderir!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı:ARGE Prodüksiyon Stüdyosu</h2>
+            <p>geliştirici takımınızla tasarladığınız donanım ve yazılımları bu projeyle birleştirerek eksiksiz bir <strong>Sanal Prodüksiyon (Virtual Production) Volume'ü</strong> inşa edin.</p>
+            <p>Laboratuvardaki masaları boşaltın. Ortaya güçlü bir DMX Par LED (Spot) yerleştirin. Öğrencilerden, oyun içindeki karakterin eline sanal bir meşale veya ışın kılıcı vermelerini isteyin. Karakter kılıcı salladıkça, etrafa yayılan dinamik ışık (Dynamic Lighting) analiz edilip DMX protokolüyle fiziksel odadaki spot ışığına aktarılacaktır. Artık oyunlar sadece ekranda değil, odanın tam içinde yaşanıyor!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

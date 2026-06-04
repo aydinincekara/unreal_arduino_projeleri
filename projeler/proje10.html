@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 10: RFID ile Gizli Odaya Giriş - Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level2: #e67e22; /* Seviye 2 Turuncusu */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1f1105 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level2);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level2); color: #000; border-color: var(--level2); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level2); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level2);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level2); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-timeline { background: linear-gradient(180deg, #d35400 0%, #a04000 100%); border-color: #e67e22; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 10: RFID ile Gizli Odaya Giriş</h1>
+                <p>Gerçek Yetki Kartı ile Sanal Kapı ve Kilit Sistemleri (Erişim Kontrolü)</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Üst Düzey Güvenlik (Access Denied)</h2>
+            <p>Siberpunk veya bilimkurgu temalı oyunlarda oyuncu sık sık kilitli laboratuvar kapılarıyla karşılaşır. Bu engeli aşmak için normalde oyun içinde bir "Anahtar Kart" (Keycard) bulması gerekir. Ancak biz bu mekaniği kırıyoruz: Oyuncu oyunda kart aramak yerine, cüzdanındaki ulaşım kartını, otel anahtarını veya atölye yetki kartını fiziksel RFID okuyucuya tutacak. Unreal Engine bu kartın özel kimlik numarasını (UID) denetleyip yetkiyi onaylayacak.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: RC522 RFID Okuyucu</h2>
+            <p>RC522 modülü hızlı ve güvenilir <strong>SPI (Serial Peripheral Interface)</strong> protokolünü kullanır. Bağlantıları çok dikkatli yapılmalıdır (3.3V kullanır, 5V'a bağlarsanız modül yanar!).</p>
+            <ul>
+                <li><strong>SDA (SS)</strong> -> Pin 10</li>
+                <li><strong>SCK</strong> -> Pin 13</li>
+                <li><strong>MOSI</strong> -> Pin 11</li>
+                <li><strong>MISO</strong> -> Pin 12</li>
+                <li><strong>RST</strong> -> Pin 9</li>
+                <li><strong>3.3V</strong> -> 3.3V Pini (Kesinlikle 5V DEĞİL)</li>
+                <li><strong>GND</strong> -> GND</li>
+            </ul>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Kartın Kimlik Numarasını (UID) Unreal'a Gönderme</span>
+#include &lt;SPI.h&gt;
+#include &lt;MFRC522.h&gt;
+
+#define SS_PIN 10
+#define RST_PIN 9
+
+MFRC522 rfid(SS_PIN, RST_PIN);
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  SPI.begin();       <span class="comment">// SPI Haberleşmesini başlat</span>
+  rfid.PCD_Init();   <span class="comment">// RFID modülünü başlat</span>
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Yeni bir kart yaklaştırılmadıysa başa dön</span>
+  <span class="keyword">if</span> (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) {
+    <span class="keyword">return</span>;
+  }
+
+  <span class="comment">// Kart okunduğunda ID'sini tutacağımız boş bir metin oluşturuyoruz</span>
+  String uidString = <span class="string">""</span>;
+
+  <span class="comment">// Kartın UID byte'larını yan yana ekleyip tek bir kelime yapıyoruz (Örn: A3B4C5D6)</span>
+  <span class="keyword">for</span> (<span class="keyword">byte</span> i = 0; i < rfid.uid.size; i++) {
+    uidString += String(rfid.uid.uidByte[i], HEX);
+  }
+
+  <span class="comment">// Harfleri BÜYÜK HARF yapıyoruz ki Unreal'da kıyaslaması kolay olsun</span>
+  uidString.toUpperCase();
+
+  <span class="comment">// Veriyi Unreal Engine'e gönder</span>
+  Serial.println(uidString);
+
+  <span class="comment">// Aynı kartı saniyede 10 kere okumasını engellemek için kartı uykuya al</span>
+  rfid.PICC_HaltA();
+  
+  <span class="comment">// Fiziksel bir gecikme (Debounce)</span>
+  delay(1000); 
+}</pre>
+            </div>
+            <div class="alert-box alert-info">
+                <strong>💡 Kendi Kartınızı Tanıtın:</strong> Önce Arduino'nun Seri Port Ekranı'nı açın. Okutmak istediğiniz (yetkili olacak) kartı cihaza yaklaştırın. Ekranda yazan kodu (Örn: <code>F3A19B22</code>) bir yere not edin. Unreal Engine'de bu kodu şifre olarak kullanacağız.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Sahnenizde "KilitliKapı" adında bir Blueprint oluşturun. Tıpkı ağırlık sensörü (Load Cell) projesinde yaptığımız gibi kapı dönerek veya yana kayarak açılacak. Ancak bu kez sayıları (Float) değil, metinleri (String) karşılaştıracağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Kart Verisini Okumak:</strong> <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> ile gelen String veriyi okuyun. Mavi pinden bir <span class="bp-pure">Trim</span> düğümü bağlayın (Trim: metnin başındaki ve sonundaki görünmez boşlukları temizler).</li>
+                
+                <li><strong>Şifre Kontrolü (String Compare):</strong> Trim edilmiş kablodan uzatıp <span class="bp-pure">Equal (String) (==)</span> düğümünü çağırın. 
+                    <ul>
+                        <li>Alt kısımdaki boşluğa Arduino'da not ettiğiniz Master Kartınızın kimliğini (Örn: <code>F3A19B22</code>) yazın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Karar Mekanizması:</strong> Eşitlik (Equal) düğümünden çıkan kırmızı kabloyu bir <span class="bp-flow">Branch</span> düğümünün durum (Condition) pinine bağlayın.
+                    <ul>
+                        <li><strong>Eğer kart DOĞRUYSA (True):</strong> Bir <span class="bp-flow">DoOnce</span> üzerinden kapı açılma <span class="bp-timeline">Timeline</span>'ına gidin (Bkz. Proje 9). Ayrıca <span class="bp-func">Play Sound</span> düğümüyle "Access Granted" (Erişim Onaylandı) tarzı olumlu bir ses efekti çalın.</li>
+                        <li><strong>Eğer kart YANLIŞSA (False):</strong> Branch'in False çıkışına bir <span class="bp-func">Print String</span> (Ekrana "Geçersiz Kart!" yazdırın) veya "Access Denied" hata sesi çalan bir düğüm ekleyin.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Önemli Güvenlik Detayı:</strong> Event Tick her karede okuma yaptığı için, Serial hattan bir veri akmıyorken (kart okutulmuyorken) <code>Read Line</code> boş bir metin (<code>""</code>) döndürecektir. Boş metin okunduğunda sistemin hata sesini sürekli (spam şeklinde) çalmaması için; Equal düğümünden önce <span class="bp-pure">Not Equal (String) (!=)</span> düğümüyle gelen verinin "Boş Olmadığından" emin olun ve sistemi öyle test edin.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı ve UI (Arayüz) Eklentisi</h2>
+            <p>Laboratuvara kurduğunuz bu sistemi harika bir sunuma dönüştürebilirsiniz. Kapının üzerine Unreal'ın <strong>Widget (UMG)</strong> sistemini kullanarak 3D bir ekran yerleştirin. Normalde kırmızı bir şekilde <em>"LÜTFEN KART OKUTUNUZ"</em> yazsın. Fiziksel kart doğru okutulduğunda arayüz yeşile dönüp <em>"HOŞ GELDİNİZ, ARGE YÖNETİCİSİ"</em> yazarak kapıyı açsın.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

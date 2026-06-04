@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 13: Fiziksel Yetenek Paneli - Arcade Makinesi</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level3: #2ecc71; /* Seviye 3 Yeşili */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #0b1f15 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level3);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level3); color: #000; border-color: var(--level3); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level3); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level3);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level3); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 13: Fiziksel Yetenek Paneli</h1>
+                <p>Arcade Kontrolcü ile Temiz (Clean) Tetikleme Mimarisi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Profesyonel Arcade Deneyimi</h2>
+            <p>Bir oyun geliştiricisinin en büyük başarısı, oyuncunun ekranla değil, oyunun dünyasıyla etkileşime girdiğini hissetmesini sağlamaktır. Standart bir klavyede "Q" veya "E" tuşlarına basmak yerine, masanızdaki koca bir "Arcade" butonuna basarak karakterinize özel güç kullandırtmak deneyimi tamamen değiştirir.</p>
+            
+            <p>Bu projede, birden fazla fiziksel butonu tek tek (if/else ile) uzun uzun yazmak yerine, tıpkı profesyonel oyunlarda yapıldığı gibi bir <strong>Dizi (Array) ve Metin Anahtarı (Switch on String)</strong> mimarisi kuracağız. Bu sayede 4 değil, 40 buton bile bağlasanız kodunuz asla karmaşıklaşmayacaktır.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Buton Dizisi (Array)</h2>
+            <p>4 adet fiziksel butona ihtiyacımız var. Her butonun bir bacağını ortak olarak GND (Toprak) hattına bağlayın. Diğer bacaklarını ise sırasıyla Arduino'nun <strong>2, 3, 4 ve 5</strong> numaralı dijital pinlerine takın. Devrede harici bir direnç kullanmayacağız, Arduino'nun içindeki Pull-Up dirençlerini aktif edeceğiz.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Çoklu Buton Yönetimi ve String Gönderimi</span>
+
+<span class="comment">// Buton pinlerini bir Dizi (Array) içinde tanımlıyoruz. </span>
+<span class="comment">// Bu sayede For döngüsü ile hepsini tek satırda kontrol edebiliriz.</span>
+<span class="keyword">const int</span> butonPinleri[] = {2, 3, 4, 5}; 
+<span class="keyword">const int</span> butonSayisi = 4;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  
+  <span class="comment">// Tüm butonları INPUT_PULLUP olarak ayarlamak için döngü kullanıyoruz</span>
+  <span class="keyword">for</span>(<span class="keyword">int</span> i = 0; i < butonSayisi; i++) {
+    pinMode(butonPinleri[i], INPUT_PULLUP);
+  }
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Her döngüde tüm butonları sırayla tara</span>
+  <span class="keyword">for</span>(<span class="keyword">int</span> i = 0; i < butonSayisi; i++) {
+    
+    <span class="comment">// Eğer butona basıldıysa (PULLUP olduğu için LOW döner)</span>
+    <span class="keyword">if</span>(digitalRead(butonPinleri[i]) == LOW) {
+      
+      <span class="comment">// Unreal Engine'e hangi butona basıldığını belirten standart bir Metin gönderiyoruz.</span>
+      <span class="comment">// Örn: "SKILL_0", "SKILL_1"</span>
+      Serial.print(<span class="string">"SKILL_"</span>);
+      Serial.println(i); 
+      
+      <span class="comment">// Spam koruması (Debounce) - Bir butona basıldığında diğerlerini bir süre beklet</span>
+      delay(250); 
+    }
+  }
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Neden 0, 1, 2, 3?:</strong> Yazılım dünyasında sayma işlemi 1'den değil 0'dan başlar. Dizinin (Array) ilk elemanı olan 2 numaralı pin, aslında indeks olarak '0'dır. Bu standarda alışmak, ileride C++ ve C# yazarken hayatınızı kurtaracaktır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Unreal Engine tarafında <code>"SKILL_0"</code>, <code>"SKILL_1"</code> gibi kelimeler alacağız. 4 farklı kelimeyi kontrol etmek için 4 tane yan yana <em>Equal (Eşit mi?)</em> düğümü koymak yerine, <strong>Switch on String</strong> (Metne Göre Anahtar) adı verilen çok daha güçlü ve temiz (clean code) bir düğüm kullanacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Veriyi Alıp Temizlemek:</strong> <span class="bp-event">Event Tick</span> -> <span class="bp-func">Read Line</span> ile metni okuyun. Arduino'dan gelen metnin sonundaki görünmez boşlukları (enter/newline karakterini) temizlemek için mutlaka bir <span class="bp-pure">Trim</span> düğümünden geçirin.</li>
+                
+                <li><strong>Anahtarlama (Switch) Kurulumu:</strong> Trim düğümünden çıkan mavi (String) kabloyu çekip <span class="bp-flow">Switch on String</span> düğümüne bağlayın. Tick event'inin beyaz (Exec) akış kablosunu da buna takın.</li>
+                
+                <li><strong>Pinleri (Çıkışları) Oluşturmak:</strong> <em>Switch on String</em> düğümünün üzerine tıklayın. Sağ taraftaki <strong>Details</strong> panelinde "Pin Names" (Pin İsimleri) adlı bir '+' butonu göreceksiniz. Buraya basarak 4 adet çıkış pini oluşturun ve isimlerini tam olarak Arduino'dan gelen kelimelerle aynı yapın:
+                    <ul>
+                        <li><code>SKILL_0</code></li>
+                        <li><code>SKILL_1</code></li>
+                        <li><code>SKILL_2</code></li>
+                        <li><code>SKILL_3</code></li>
+                    </ul>
+                </li>
+                
+                <li><strong>Yetenekleri Tetiklemek:</strong> Artık her bir pinden çıkış alarak farklı bir aksiyonu tetikleyebilirsiniz.
+                    <ul>
+                        <li><strong>SKILL_0 (Kırmızı Buton):</strong> <span class="bp-func">Spawn Actor from Class</span> ile bir alev topu (Fireball) fırlatın.</li>
+                        <li><strong>SKILL_1 (Mavi Buton):</strong> <span class="bp-func">Launch Character</span> düğümü ile karakteri yukarı/ileri zıplatın (Dash yeteneği).</li>
+                        <li><strong>SKILL_2 (Yeşil Buton):</strong> Karakterin etrafındaki kalkan (Shield) mesh'inin <em>Visibility</em> (Görünürlük) değerini açın.</li>
+                        <li><strong>SKILL_3 (Sarı Buton):</strong> <span class="bp-func">Play Sound 2D</span> ile oyundaki tüm düşmanları sersemleten (Stun) bir çığlık sesi çalın.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Hata Ayıklama (Troubleshooting):</strong> Butona bastığınızda hiçbir şey olmuyorsa, Arduino'daki Serial.print komutlarıyla Unreal'daki Switch düğümüne yazdığınız Pin isimleri arasında harf/büyük-küçük uyumsuzluğu vardır. Veya <code>Trim</code> düğümünü unutmuşsunuzdur!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Cooldown (Bekleme Süresi) Sistemi</h2>
+            <p>Laboratuvar ekibindeki gençler bu paneli kurduğunda, ilk yapacakları şey butonlara deliler gibi basıp saniyede 10 tane alev topu fırlatmak olacaktır!</p>
+            <p><strong>Geliştirme Görevi:</strong> Oyun tasarımında denge (Balance) esastır. Öğrencilerinizden, Switch düğümünün her bir çıkışına bir <span class="bp-flow">DoOnce</span> ve <span class="bp-func">Delay (Gecikme)</span> düğümü ekleyerek bir <strong>Cooldown (Yetenek Bekleme Süresi)</strong> sistemi kurmalarını isteyin. Örneğin SKILL_0'a basıldığında yetenek kullanılsın, ancak 3 saniyelik Delay (bekleme) bitmeden o butona tekrar basılamasın!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

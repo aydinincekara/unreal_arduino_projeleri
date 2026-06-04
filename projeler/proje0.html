@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 0: Blueprint & Seri Port Kurulumu - Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --arduino-teal: #00979d;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #12151f 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--ue-blue);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--ue-blue); color: #fff; border-color: var(--ue-blue); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--ue-blue); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--ue-blue);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--ue-blue); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+        .alert-danger { border-color: var(--danger-color); }
+        .alert-danger strong { color: var(--danger-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        .blueprint-node {
+            display: inline-block;
+            background: linear-gradient(180deg, #3b4b5e 0%, #2a3644 100%);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 4px;
+        }
+
+        .blueprint-node.event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .blueprint-node.func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 0: Blueprint & Seri Port Kurulumu</h1>
+                <p>Unreal Engine 5 ile Arduino'yu Konuşturmaya Başlıyoruz</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🔌 1. Unreal Engine Seri Port Eklentisi (Plugin) Kurulumu</h2>
+            <p>Unreal Engine 5 (UE5), dış dünyadan gelen USB verilerini doğrudan okuyamaz. Bu engeli aşmak için açık kaynaklı ve ücretsiz bir eklentiye ihtiyacımız var (Örn: <em>Serial COM Plugin</em> veya <em>UE4Duino</em>'nun güncel sürümü).</p>
+
+            <ol>
+                <li>İnternetten UE5 uyumlu bir <strong>Serial COM</strong> eklentisi indirin.</li>
+                <li>Unreal projenizin kayıtlı olduğu klasöre gidin (Örn: <code>Belgeler\Unreal Projects\ArduinoTest</code>).</li>
+                <li>Bu klasörün içine <strong>Plugins</strong> adında yeni bir klasör oluşturun.</li>
+                <li>İndirdiğiniz eklenti dosyasını zipten çıkarıp bu <strong>Plugins</strong> klasörünün içine atın.</li>
+                <li>Unreal Engine projenizi açın. Üst menüden <strong>Edit -> Plugins</strong> sekmesine girip eklentiyi bulun ve yanındaki tiki işaretleyip motoru yeniden başlatın.</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Önemli:</strong> Eklentiyi aktifleştirdikten sonra Blueprint pencerinizde sağ tıkladığınızda "Serial" kelimesini aratırsanız, <strong>Open Serial Port</strong> ve <strong>Read Line</strong> gibi yeni düğümlerin (nodes) geldiğini göreceksiniz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 2. Fiziksel Katman: Arduino Kodu</h2>
+            <p>Tıpkı önceki eğitimlerimizde olduğu gibi, Arduino'muzun görevi bir sensörden veri okuyup bunu bilgisayara fırlatmaktır. Basit bir Potansiyometre (A0 pini) bağlayalım ve bu veriyi gönderelim.</p>
+
+            <div class="code-wrapper">
+<pre><span class="keyword">void</span> setup() {
+  <span class="comment">// İletişim hızını 9600 Baud Rate olarak ayarlıyoruz.</span>
+  Serial.begin(9600); 
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// A0 pinine bağlı potansiyometreden gelen 0-1023 arası değeri oku</span>
+  <span class="keyword">int</span> sensorDeger = analogRead(A0);
+  
+  <span class="comment">// Okunan veriyi Seri Porta yaz ve Alt Satıra in (println)</span>
+  <span class="comment">// Bu 'ln' (Satır Sonu) kısmı Unreal Engine'in veriyi yakalaması için ZORUNLUDUR!</span>
+  Serial.println(sensorDeger); 
+  
+  <span class="comment">// Unreal Engine'i veri yağmuruna boğmamak için kısa bir bekleme</span>
+  delay(30); 
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 3. Blueprint (Görsel Kodlama) Altyapısı</h2>
+            <p>Şimdi Unreal Engine'de bir <strong>Actor Blueprint</strong> oluşturalım (İsmi <code>BP_ArduinoManager</code> olsun) ve onu sürükleyip sahnemize bırakalım. İçine girip Event Graph (Olay Grafiği) sekmesine geçelim.</p>
+
+            
+
+            <h3>Adım Adım Düğüm (Node) Bağlantıları:</h3>
+            
+            <p><strong>1. Portu Açmak (Oyun Başladığında):</strong></p>
+            <p>Oyuna girdiğimiz an Arduino ile bağlantı kurmalıyız. <span class="blueprint-node event">Event BeginPlay</span> düğümünden kırmızı bir kablo çekin ve <span class="blueprint-node func">Open Serial Port</span> düğümünü bulun. 
+            <ul>
+                <li><strong>Port:</strong> "COM3" (Kendi Arduino portunuzu yazın)</li>
+                <li><strong>Baud Rate:</strong> 9600</li>
+            </ul>
+            Bu düğümün <em>Return Value</em> (Mavi çıkış) pinine sağ tıklayıp <strong>Promote to Variable</strong> deyin ve adına <code>ArduinoPort</code> koyun. (Bağlantıyı hafızaya aldık).</p>
+
+            <p><strong>2. Veriyi Sürekli Okumak (Her Karede):</strong></p>
+            <p>Oyun boyunca Arduino'dan gelen veriyi dinlemeliyiz. <span class="blueprint-node event">Event Tick</span> düğümünden kablo çekin. Ekranın solundaki <code>ArduinoPort</code> değişkenini sahneye sürükleyip (Get) ondan bir mavi kablo çekin ve <span class="blueprint-node func">Read Line</span> düğümünü çağırın. Bu düğüm Arduino'nun <code>println</code> ile gönderdiği metni okur.</p>
+
+            <p><strong>3. Veriyi Ekrana Yazdırmak:</strong></p>
+            <p><span class="blueprint-node func">Read Line</span> düğümünden çıkan <em>Return Value</em> (Sarı String pini) kablosunu çekip <span class="blueprint-node func">Print String</span> düğümüne bağlayın. Oyunu başlattığınızda sol üst köşede Arduino'dan gelen Potansiyometre sayılarını göreceksiniz!</p>
+        </div>
+
+        <div class="section-card">
+            <h2>🛠️ 4. Hata Ayıklama (Troubleshooting)</h2>
+            
+            <div class="alert-box alert-danger">
+                <strong>Erişim Engellendi (Access Denied) Hatası:</strong> Unreal Engine'de Play (Oynat) butonuna basmadan önce, Arduino IDE programındaki <strong>Seri Port Ekranı'nın (Serial Monitor)</strong> kapalı olduğundan kesinlikle emin olun. Portu aynı anda sadece tek bir program kullanabilir!
+            </div>
+
+            <div class="alert-box alert-warning">
+                <strong>Veriler Sürekli "0" mı Geliyor?:</strong> Arduino kodunuzda <code>Serial.print</code> yerine <code>Serial.println</code> yazdığınızdan emin olun. Unreal Engine'deki "Read Line" komutu, cümlenin sonundaki o enter/satır sonu gizli işaretini görmeden veriyi okumaz.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

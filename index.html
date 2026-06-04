@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unreal Engine & Arduino - Etkileşimli Donanım Portalı</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ <!--[cite: 1] --> */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc;
+            --ue-hover: #0098ff;
+            --arduino-teal: #00979d;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --level1: #3498db;
+            --level2: #e67e22;
+            --level3: #2ecc71;
+            --level4: #9b59b6;
+            --level5: #e74c3c;
+            --level6: #f1c40f; /* Eklenen Seviye 6 Rengi */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #12151f 0%, #0b0c10 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--ue-blue);
+            box-shadow: 0 5px 25px rgba(0, 122, 204, 0.15);
+            position: relative;
+        }
+
+        .header-container { max-width: 1200px; margin: 0 auto; position: relative; }
+
+        .guide-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .guide-btn:hover { background-color: var(--ue-blue); color: #fff; border-color: var(--ue-blue); }
+
+        header h1 { font-size: 3rem; color: #ffffff; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px; }
+        header p { color: var(--ue-blue); font-size: 1.2rem; font-weight: 500; }
+
+        .container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--ue-blue);
+        }
+
+        h2 { color: #ffffff; font-size: 1.8rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--ue-blue); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .info-box { background-color: #161c24; padding: 25px; border-radius: 6px; }
+        .info-box h4 { color: #fff; font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .img-placeholder {
+            width: 100%;
+            background-color: #0b0c10;
+            border: 1px dashed var(--text-muted);
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin: 15px 0;
+            color: var(--ue-blue);
+            font-style: italic;
+        }
+
+        .primary-btn {
+            display: inline-block;
+            background-color: var(--ue-blue);
+            color: #fff;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+        }
+        .primary-btn:hover { background-color: var(--ue-hover); transform: translateY(-2px); }
+
+        .level-header { display: flex; align-items: center; gap: 15px; margin: 60px 0 25px 0; padding-bottom: 10px; border-bottom: 2px solid var(--btn-bg); }
+        .level-header h2 { font-size: 2rem; color: #fff; border: none; margin: 0; padding: 0; }
+        .level-badge { color: #fff; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.95rem; }
+
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .project-card {
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            padding: 20px;
+            transition: 0.3s;
+            border: 1px solid var(--btn-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .project-card:hover { transform: translateY(-5px); border-color: var(--ue-blue); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        
+        .project-number { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; color: var(--ue-blue); text-transform: uppercase; letter-spacing: 1px; }
+        .project-title { font-size: 1.15rem; color: #ffffff; margin-bottom: 10px; line-height: 1.3; font-weight: 600; }
+        .project-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; flex-grow: 1; line-height: 1.5; }
+        
+        .project-btn {
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.2s;
+            margin-top: auto;
+        }
+        .project-card:hover .project-btn { background-color: var(--ue-blue); color: #fff; }
+
+        footer { text-align: center; color: var(--text-muted); margin-top: 60px; font-size: 0.9rem; padding-top: 30px; border-top: 1px solid var(--btn-bg); }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .guide-btn { position: relative; display: inline-block; margin-top: 20px; }
+            .level-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="egitmen_rehberi.html" class="guide-btn">🛠️ UE5 Eğitmen Rehberi</a>
+            <h1>Unreal Engine & Arduino</h1>
+            <p>Sanal Prodüksiyon ve İleri Düzey Etkileşim Laboratuvarı</p>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- BİLGİ KARTLARI (Kaynak Tasarım)[cite: 1] -->
+        <div class="section-card">
+            <h2>Geleceğin Teknolojisini Fiziksel Dünyaya Taşıyın</h2>
+            <p>Unreal Engine 5 (UE5), sadece bir oyun motoru değil; sinema endüstrisi, mimari görselleştirme ve sanal prodüksiyon alanlarında dünya standartlarını belirleyen devasa bir ekosistemdir. Bu portal, UE5'in eşsiz grafik gücünü ve hesaplama yeteneklerini, Arduino ve ESP32 mikrokontrolcüleriyle fiziksel dünyaya entegre etmek için özel olarak tasarlanmıştır.[cite: 1]</p>
+            
+            <p>15-30 yaş arası AR-GE ekibimiz bu 38 projelik sarmal müfredatta, satırlarca kod yazmak yerine Unreal Engine'in <strong>Blueprint (Görsel Kodlama)</strong> sistemini kullanarak endüstriyel kalitede siber-fiziksel sistemler inşa edecekler.[cite: 1]</p>
+        </div>
+
+        <div class="section-card">
+            <h2>💻 Teknolojik Altyapı ve Çalışma Mantığı</h2>
+            <p>Donanım ile Unreal Engine arasındaki veri köprüsünü kurarken endüstrinin en geçerli yöntemlerini kullanıyoruz. Sistem mimarisini anlamak, projeleri başarıyla geliştirmenin ilk kuralıdır.[cite: 1]</p>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <h4>🟦 Blueprints (Görsel Kodlama)</h4>
+                    <p>Unreal Engine'de C++ bilmeden, düğümleri (nodes) birbirine bağlayarak algoritmalar oluşturduğumuz sistemdir. Sensörlerden gelen veriler bu düğümler üzerinden oyundaki aktörlerin fizik kurallarına etki eder.[cite: 1]</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px; color: var(--text-muted);"><em>Blueprint ağının çalışma akışı, proje bazlı olarak işlenmektedir.</em></p>
+                </div>
+                
+                <div class="info-box">
+                    <h4>🔌 Seri Port & UDP Eklentileri</h4>
+                    <p>Unreal Engine'in varsayılan paketinde Seri Port okuma özelliği kapalıdır. Arduino ile haberleşmek için eklentiler (Plugins) kullanılır. Ağ (Kablosuz) haberleşmesinde ise OSC ve UDP protokolleri devreye girer.[cite: 1]</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Sanal Prodüksiyon (Virtual Production) Nedir?</h3>
+                <p>Müfredatımızın en ileri seviyesinde (Seviye 5 ve 6) yer alan Sanal Prodüksiyon, fiziksel dekorlar (Arduino ile yönetilen ışıklar ve motorlar) ile ekrandaki sanal dünyanın mükemmel senkronizasyonudur.[cite: 1]</p>
+            </div>
+        </div>
+
+        <div class="section-card" style="text-align: center; border-left: none; border-top: 5px solid var(--ue-blue);">
+            <h2>🚀 Başlangıç ve Altyapı Kurulumu</h2>
+            <p>Unreal Engine içerisine Serial Port eklentisinin kurulması, Arduino'nun COM portundan veri gönderimi ve Blueprint üzerinden bu verilerin okunmasını içeren başlangıç modülü.[cite: 1]</p>
+            <a href="projeler/proje0.html" class="primary-btn">Proje 0: Blueprint & Seri Port Kurulumu</a>
+        </div>
+
+        <!-- MÜFREDAT PROJELERİ (Grid Yapısı) -->
+        
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level1);">Seviye 1</span>
+            <h2>Blueprints ve Seri Port Temelleri</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 1</div>
+                <div class="project-title">İlk Sinyal: Buton ile Unreal Sahnesinde Obje Doğurma</div>
+                <div class="project-desc">Fiziksel bir butona basıldığında Unreal Engine dünyasında 3 boyutlu bir nesnenin oluşturulması.</div>
+                <a href="projeler/proje1.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 2</div>
+                <div class="project-title">Gerçek Dünyaya Dönüş: Unreal'dan Arduino LED'ini Yakmak</div>
+                <div class="project-desc">Oyundaki bir tetikleyici alanına (Trigger Box) girildiğinde gerçek dünyadaki bir LED'in yanması.</div>
+                <a href="projeler/proje2.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 3</div>
+                <div class="project-title">Potansiyometre ile Unreal'da Zamanı Yavaşlatmak</div>
+                <div class="project-desc">Analog bir potansiyometre çevrilerek oyunun zaman akışının (Slow Motion) canlı olarak kontrol edilmesi.</div>
+                <a href="projeler/proje3.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 4</div>
+                <div class="project-title">Çift Yönlü İletişim: Hasara Göre Titreşim Motoru</div>
+                <div class="project-desc">Sanal karakter hasar aldığında gamepad mantığıyla fiziksel bir titreşim motorunun (Rumble) çalışması.</div>
+                <a href="projeler/proje4.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 5</div>
+                <div class="project-title">LDR (Işık Sensörü) ile Dinamik Gece/Gündüz Döngüsü</div>
+                <div class="project-desc">Odanın ışık seviyesine göre Unreal Engine'deki güneşin batıp doğmasının sağlanması.</div>
+                <a href="projeler/proje5.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 6</div>
+                <div class="project-title">Ultrasonik Sensör ile Yaklaşan Düşmanları Tetiklemek</div>
+                <div class="project-desc">Elinizi fiziksel bir sensöre yaklaştırdıkça oyun içindeki düşmanların veya objelerin size yaklaşması.</div>
+                <a href="projeler/proje6.html" class="project-btn">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level2);">Seviye 2</span>
+            <h2>İleri Düzey Sensörler ve Fizik Etkileşimi</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 7</div>
+                <div class="project-title">MPU6050 (İvmeölçer) ile Blueprint Üzerinden Yönlendirme</div>
+                <div class="project-desc">Elinizdeki sensör modülünü sağa sola eğerek oyundaki karakterin veya kameranın yönlendirilmesi.</div>
+                <a href="projeler/proje7.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 8</div>
+                <div class="project-title">Joystick ile Unreal Engine Araç Fiziği Kontrolü</div>
+                <div class="project-desc">Fiziksel analog joystick ile Unreal Engine'in gelişmiş araç fiziği (Chaos Vehicles) altyapısında sürüş.</div>
+                <a href="projeler/proje8.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 9</div>
+                <div class="project-title">Ağırlık Sensörü (Load Cell) ile Basınca Duyarlı Kapı Açma</div>
+                <div class="project-desc">Ağırlık sensörüne belirli bir miktar baskı (kg) uygulandığında sanal zindan kapılarının açılması.</div>
+                <a href="projeler/proje9.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 10</div>
+                <div class="project-title">RFID ile Gizli Odaya Giriş (Gerçek Kart ile Sanal Kapı)</div>
+                <div class="project-desc">Gerçek bir NFC/RFID akıllı kart okutulduğunda oyun içindeki kilitli kapıların erişime açılması.</div>
+                <a href="projeler/proje10.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 11</div>
+                <div class="project-title">Servo Motor ile Sanal Sandığın Gerçek Dünyada Açılması</div>
+                <div class="project-desc">Karakter sandığı açtığında masanızdaki gerçek servo motorun hareket ederek küçük bir kutuyu açması.</div>
+                <a href="projeler/proje11.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 12</div>
+                <div class="project-title">Kalp Atış Sensörü ile Korku Müziklerini Değiştirme</div>
+                <div class="project-desc">Oyuncunun nabız (BPM) hızına göre korku oyunlarındaki müzik temposunun dinamik olarak artması.</div>
+                <a href="projeler/proje12.html" class="project-btn">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level3);">Seviye 3</span>
+            <h2>Oyun Mekanikleri ve UI Entegrasyonu</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 13</div>
+                <div class="project-title">Fiziksel Buton Paneli ile Yetenek Tetikleme</div>
+                <div class="project-desc">Atari makinesi butonları kullanarak oyundaki farklı süper yeteneklerin ve animasyonların tetiklenmesi.</div>
+                <a href="projeler/proje13.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 14</div>
+                <div class="project-title">Unreal UMG ve Arduino OLED Ekran Senkronizasyonu</div>
+                <div class="project-desc">Oyun içi can ve mermi durumlarının (UI), fiziksel bir OLED ekrana anlık olarak yansıtılması.</div>
+                <a href="projeler/proje14.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 15</div>
+                <div class="project-title">Su Seviye Sensörü ile Oyundaki Oksijen Barını Yönetmek</div>
+                <div class="project-desc">Fiziksel bardağa su doldurdukça, karakterin dalış maskesindeki oksijen seviyesinin dolması.</div>
+                <a href="projeler/proje15.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 16</div>
+                <div class="project-title">Gerçek Sıcaklığa Göre Sahneye Kar/Yağmur Yağdırmak</div>
+                <div class="project-desc">Laboratuvar DHT11 ortam sıcaklığına göre Niagara partiküllerinin kar veya yağmur formuna girmesi.</div>
+                <a href="projeler/proje16.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 17</div>
+                <div class="project-title">Adreslenebilir LED (WS2812B) ile Fiziksel Can Barı</div>
+                <div class="project-desc">Oyundaki canınız azaldıkça RGB LED şeridinizin yeşilden kırmızıya dönüp kısalması.</div>
+                <a href="projeler/proje17.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 18</div>
+                <div class="project-title">Lazer Modülü ve Fotodirenç ile Fiziksel Hedef Vurma</div>
+                <div class="project-desc">El yapımı fiziksel lazer tabancasıyla sensörleri vurarak sanal dünyadaki hedefleri patlatma.</div>
+                <a href="projeler/proje18.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 19</div>
+                <div class="project-title">Enkoder (Rotary Encoder) ile Silah Tekerleği Seçimi</div>
+                <div class="project-desc">Tıklanabilir sonsuz potansiyometre ile GTA tarzı dairesel silah veya radyo menüsünde gezinme.</div>
+                <a href="projeler/proje19.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 20</div>
+                <div class="project-title">Fiziksel Kokpit Tasarımı ve Uçuş Simülatörü</div>
+                <div class="project-desc">Öğrenilen tüm buton ve mekaniklerin birleştiği devasa bir fiziksel uçak/uzay gemisi kokpiti tasarımı.</div>
+                <a href="projeler/proje20.html" class="project-btn">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level4);">Seviye 4</span>
+            <h2>IoT, Bulut Bilişim ve Kablosuz Ağlar</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 21</div>
+                <div class="project-title">Unreal Engine UDP Mesajlaşma Altyapısı</div>
+                <div class="project-desc">Kabloları ortadan kaldırıp oyun motorunun Wi-Fi (UDP soket) üzerinden ağ verisi dinlemesi.</div>
+                <a href="projeler/proje21.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 22</div>
+                <div class="project-title">ESP32 ve MPU6050 İle Kablosuz VR Kılıcı Geliştirme</div>
+                <div class="project-desc">Tamamen taşınabilir bataryalı ESP32 ile Beat Saber tarzı kablosuz kılıç donanımı üretimi.</div>
+                <a href="projeler/proje22.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 23</div>
+                <div class="project-title">ESP32 Web Server ile Cep Telefonundan Kontrol</div>
+                <div class="project-desc">Cep telefonu tarayıcısı üzerinden, oyundaki veya laboratuvardaki akıllı sistemleri kontrol etme.</div>
+                <a href="projeler/proje23.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 24</div>
+                <div class="project-title">İki Yönlü IoT: Fiziksel Rölelere Komut Akışı</div>
+                <div class="project-desc">Oyun motorundan gelen bir alarm komutunun 220V gerçek lambaları veya sirenleri tetiklemesi.</div>
+                <a href="projeler/proje24.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 25</div>
+                <div class="project-title">Çoklu Düğüm (Multi-Node) Ağı ve Dijital İkiz</div>
+                <div class="project-desc">Birden fazla ESP32'nin aynı anda ana sunucuya bağlanıp devasa laboratuvar kontrol ağını kurması.</div>
+                <a href="projeler/proje25.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 26</div>
+                <div class="project-title">OSC Protokolü ile Görsel Şov Yönetimi</div>
+                <div class="project-desc">Profesyonel VJ standartı olan Open Sound Control (OSC) protokolü ile görsel efektleri yönetme.</div>
+                <a href="projeler/proje26.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 27</div>
+                <div class="project-title">Web API'leri ve JSON ile Gerçek Dünya Verilerini Çekmek</div>
+                <div class="project-desc">İnternetten canlı hava durumu veya finans verilerini çekip oyuna aktarma.</div>
+                <a href="projeler/proje27.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 28</div>
+                <div class="project-title">Firebase'den Çekilen Veriyi Unreal'da Görselleştirme</div>
+                <div class="project-desc">Google Firebase kullanılarak oyun içi küresel skor ve global duyuruların buluttan alınması.</div>
+                <a href="projeler/proje28.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 29</div>
+                <div class="project-title">ESP-NOW ile Çoklu Oyuncu (Multiplayer) Yarışması</div>
+                <div class="project-desc">İnternet modemi olmadan ESP32'lerin kendi arasında şifreli iletişim kurduğu Gamepad altyapısı.</div>
+                <a href="projeler/proje29.html" class="project-btn">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level5);">Seviye 5</span>
+            <h2>Yapay Zeka, Biyomedikal ve BCI</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 30</div>
+                <div class="project-title">Yapay Zeka Gözü: ESP32-CAM ile Güvenlik Kameraları</div>
+                <div class="project-desc">Fiziksel kameradan alınan canlı MJPEG video yayınının Unreal Engine içindeki monitörlerde izlenmesi.</div>
+                <a href="projeler/proje30.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 31</div>
+                <div class="project-title">Biyonik Bağlantı: Kas Sinyalleri (EMG) ile Karakter Yönetimi</div>
+                <div class="project-desc">Kaslardan okunan elektriksel biyolojik sinyallerle sanal ortamda karakter kontrolü veya protez yönetimi.</div>
+                <a href="projeler/proje31.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 32</div>
+                <div class="project-title">Beyin Bilgisayar Arayüzü (BCI): EEG ile Telekinezi</div>
+                <div class="project-desc">NeuroSky başlığı ile oyuncunun odaklanma dalgalarını analiz ederek nesneleri havada hareket ettirme.</div>
+                <a href="projeler/proje32.html" class="project-btn">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <div class="level-header">
+            <span class="level-badge" style="background-color: var(--level6);">Seviye 6</span>
+            <h2>Sanal Prodüksiyon ve Büyük Final</h2>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-number">Proje 33</div>
+                <div class="project-title">DMX Işık Kontrolü: Gerçek Sahne Işıklarını Yönetmek</div>
+                <div class="project-desc">Oyun içindeki efektlerin Art-Net protokolüyle fiziksel spot lambalarına yansıtılması.</div>
+                <a href="projeler/proje33.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 34</div>
+                <div class="project-title">Fiziksel Kamera Donanımı ile Sanal Kamerayı Eşleştirme</div>
+                <div class="project-desc">Gerçek kameranın yönünü oyun içindeki sinematik kameraya anlık aktaran Tracker sistemi.</div>
+                <a href="projeler/proje34.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 35</div>
+                <div class="project-title">Ses Sensörü ile Niagara Partiküllerini Dans Ettirmek</div>
+                <div class="project-desc">Ortamdaki müziğin ritimlerine (Audio-Reactive) göre partikül sistemlerinin patlaması.</div>
+                <a href="projeler/proje35.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card">
+                <div class="project-number">Proje 36</div>
+                <div class="project-title">Otonom Robotun Konumunu Unreal Radarına Yansıtmak</div>
+                <div class="project-desc">Zeminde hareket eden otonom robotların (İKA) koordinatlarını dijital ikiz radarında canlı takip etme.</div>
+                <a href="projeler/proje36.html" class="project-btn">İncele &rarr;</a>
+            </div>
+            <div class="project-card" style="border-color: var(--level6);">
+                <div class="project-number" style="color: var(--level6);">Proje 37 - Büyük Final</div>
+                <div class="project-title">Dev Fiziksel Kaçış Odası (Escape Room) Simülasyonu</div>
+                <div class="project-desc">Tüm donanımların, ağların ve DMX ışıklarının birleşip odanın kilitlerini açtığı Merkezi "Game Master" projesi.</div>
+                <a href="projeler/proje37.html" class="project-btn" style="background-color: var(--level6); color: #000;">İncele &rarr;</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy;  2026 İnteraktif Teknoloji ve ARGE Atölyesi. Tüm Hakları Saklıdır.</p>
+        </footer>
+    </div>
+
+</body>
+</html>

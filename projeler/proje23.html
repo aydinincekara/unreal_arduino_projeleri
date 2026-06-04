@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 23: Akıllı Telefon Entegrasyonu - ESP32 Web Server</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Siber) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 23: Akıllı Telefon Entegrasyonu</h1>
+                <p>ESP32 Web Server Üzerinden Cep Telefonu ile Sanal Ev/Oyun Kontrolü</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Odanın Hakimi Sizsiniz</h2>
+            <p>Oyun içi dünyalar giderek akıllı ev konseptleriyle bütünleşiyor. Bu projede, ESP32 modülünü bir "Web Sunucusuna" (Web Server) dönüştürüyoruz. ESP32, belleğinde basit bir HTML arayüzü barındıracak.</p>
+            <p>Aynı Wi-Fi ağına bağlı cep telefonunuzdan ESP32'nin IP adresine girdiğinizde karşınıza "Işığı Aç" ve "Işığı Kapat" butonları çıkacak. Telefondan butona tıkladığınızda, ESP32 Unreal Engine'e bir komut fırlatacak ve oyun motorundaki odanın ışıkları fiziksel dünyadan verilen bu mobil emirle yanıp sönecek!</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: ESP32 Web Server Kodlaması</h2>
+            <p>Bu kodda hiçbir fiziksel butona ihtiyacımız yok. Kullanıcının arayüzü cep telefonu olacak. ESP32 sadece bir köprü görevi görecek. <code>WebServer.h</code> kütüphanesi ile telefona HTML gönderecek, gelen tıklamalara göre UDP üzerinden Unreal'a sinyal yollayacağız.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Web Server ve UDP Köprüsü</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>; 
+<span class="keyword">const int</span> unrealPort = 8888;
+
+WebServer server(80); <span class="comment">// 80 numaralı standart web portu</span>
+WiFiUDP udp;
+
+<span class="comment">// Telefondan görülecek basit HTML arayüzü</span>
+<span class="keyword">const char</span>* htmlArayuz = R"rawliteral(
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;style&gt;
+  body { text-align: center; font-family: Arial; background-color: #121212; color: white; padding-top: 50px; }
+  .btn { padding: 20px 40px; font-size: 24px; margin: 10px; border-radius: 10px; border: none; cursor: pointer; color: white; }
+  .btn-ac { background-color: #2ecc71; }
+  .btn-kapat { background-color: #e74c3c; }
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+  &lt;h1&gt;Sanal Ev Kontrol Paneli&lt;/h1&gt;
+  &lt;button class="btn btn-ac" onclick="fetch('/ac')"&gt;Işığı Aç&lt;/button&gt;&lt;br&gt;
+  &lt;button class="btn btn-kapat" onclick="fetch('/kapat')"&gt;Işığı Kapat&lt;/button&gt;
+&lt;/body&gt;&lt;/html&gt;
+)rawliteral";
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) {
+    delay(500); Serial.print(<span class="string">"."</span>);
+  }
+  <span class="comment">// Telefondan girilecek IP adresini ekrana yazdır!</span>
+  Serial.println(<span class="string">"\nTelefondan şu IP'ye girin:"</span>);
+  Serial.println(WiFi.localIP());
+
+  <span class="comment">// Web Sunucu Yönlendirmeleri (Routing)</span>
+  server.on(<span class="string">"/"</span>, []() {
+    server.send(200, <span class="string">"text/html"</span>, htmlArayuz);
+  });
+  
+  server.on(<span class="string">"/ac"</span>, []() {
+    udpGonder(<span class="string">"ISIK_AC"</span>);
+    server.send(200, <span class="string">"text/plain"</span>, <span class="string">"Sinyal Gitti"</span>);
+  });
+  
+  server.on(<span class="string">"/kapat"</span>, []() {
+    udpGonder(<span class="string">"ISIK_KAPAT"</span>);
+    server.send(200, <span class="string">"text/plain"</span>, <span class="string">"Sinyal Gitti"</span>);
+  });
+
+  server.begin();
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Sunucuya gelen talepleri dinle</span>
+  server.handleClient();
+}
+
+<span class="comment">// UDP Gönderme Fonksiyonu</span>
+<span class="keyword">void</span> udpGonder(String mesaj) {
+  udp.beginPacket(unrealIP, unrealPort);
+  udp.print(mesaj);
+  udp.endPacket();
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 IP Adresi Nedir?:</strong> ESP32'yi çalıştırdığınızda Arduino Serial Monitör'de <code>192.168.1.35</code> gibi bir numara çıkacaktır. Cep telefonunuzun web tarayıcısına (Chrome/Safari) tam olarak bu numarayı yazmanız yeterlidir.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Sahnemizde bir oda tasarlayalım ve tavana bir <strong>Point Light</strong> (Nokta Işık) ekleyelim. Bu ışığı Level Blueprint'e referans olarak alacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Gelen Sinyali Yakalamak:</strong> Proje 21'deki gibi <span class="bp-event">Event On UDP Message Received</span> düğümünü kullanıp Bytes verisini <span class="bp-pure">Bytes to String</span> ile metne dönüştürün.</li>
+                
+                <li><strong>Yönlendirme (Switch):</strong> Gelen metni <span class="bp-pure">Trim</span> yapıp <span class="bp-flow">Switch on String</span> düğümüne sokun. Pinleri <code>ISIK_AC</code> ve <code>ISIK_KAPAT</code> olarak ikiye ayırın.</li>
+                
+                <li><strong>Işığı Kontrol Etmek:</strong>
+                    <ul>
+                        <li>Sahnedeki <em>Point Light</em> referansınızı alıp ondan bir kablo çekin ve <span class="bp-func">Set Visibility</span> (Görünürlüğü Ayarla) düğümünü çağırın.</li>
+                        <li><code>ISIK_AC</code> pinini bu düğüme bağlayın ve <em>New Visibility</em> kutucuğunu işaretleyin (True).</li>
+                        <li>Tekrar bir <span class="bp-func">Set Visibility</span> düğümü çağırın. Bu kez <code>ISIK_KAPAT</code> pinini bağlayın ve kutucuğu boş bırakın (False).</li>
+                    </ul>
+                </li>
+            </ol>
+            
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Akıllı Ev Simülasyonu</h2>
+            <p>ekibinizin, yazdıkları C++ ve HTML kodlarını doğrudan kendi kişisel cep telefonlarının ekranında, üstelik şık butonlar halinde görmesi çok motive edici bir andır.</p>
+            <p><strong>Büyük Görev:</strong> Sistemi genişletin! HTML kodunun içerisine CSS ile 3 adet farklı renkli buton (Kırmızı, Yeşil, Mavi) ekleyin. Telefondan kırmızı butona tıklandığında, Unreal Engine'deki <code>Set Light Color</code> düğümü tetiklensin ve odanın atmosferi anında değişsin. Kendi Hue akıllı lamba simülasyonunuzu yaratın!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

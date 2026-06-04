@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eğitmen Rehberi - Siber-Fiziksel Sistemler Laboratuvarı</title>
+    <style>
+        /* UNREAL ENGINE & IOT KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --guide-color: #e67e22; /* Rehber Turuncusu */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        /* HEADER DÜZENLEMESİ (OVERLAP HATASI KESİN ÇÖZÜM) */
+        header {
+            background: linear-gradient(180deg, #1f1105 0%, #0b0c10 100%);
+            padding: 30px 20px 50px 20px;
+            border-bottom: 4px solid var(--guide-color);
+            box-shadow: 0 5px 25px rgba(230, 126, 34, 0.15);
+        }
+
+        .header-container { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .back-btn {
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            border: 1px solid var(--text-muted);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn:hover { 
+            background-color: var(--guide-color); 
+            color: #000; 
+            border-color: var(--guide-color); 
+            box-shadow: 0 0 15px rgba(230, 126, 34, 0.4);
+        }
+
+        .title-area {
+            text-align: center;
+        }
+
+        header h1 { font-size: 2.8rem; color: #ffffff; margin-bottom: 15px; line-height: 1.2; letter-spacing: 1px; }
+        header p { color: var(--guide-color); font-size: 1.25rem; font-weight: bold; letter-spacing: 1px;}
+
+        /* İÇERİK KARTLARI */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--guide-color);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 25px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        h3 { color: var(--guide-color); margin-top: 30px; margin-bottom: 15px; font-size: 1.35rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        ul { margin-left: 20px; color: var(--text-main); margin-bottom: 20px;}
+        li { margin-bottom: 12px; font-size: 1.05rem; }
+        strong { color: #fff; }
+
+        /* UYARI VE İPUCU KUTULARI (PRO-TIPS) */
+        .alert-box { 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin: 30px 0; 
+            font-size: 1.05rem; 
+            background-color: #11151c; 
+            border-left: 6px solid var(--ue-blue); 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3); 
+        }
+        .alert-box h4 { margin-bottom: 12px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;}
+        
+        .alert-info { border-color: var(--info-color); }
+        .alert-info h4 { color: var(--info-color); }
+        
+        .alert-success { border-color: var(--success-color); }
+        .alert-success h4 { color: var(--success-color); }
+        
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning h4 { color: var(--warning-color); }
+
+        .alert-danger { border-color: var(--danger-color); }
+        .alert-danger h4 { color: var(--danger-color); }
+
+        .highlight { color: var(--guide-color); font-weight: bold; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .section-card { padding: 25px; }
+            .top-bar { margin-bottom: 20px; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="top-bar">
+                <a href="index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            </div>
+            <div class="title-area">
+                <h1>Profesyonel Eğitmen ve Laboratuvar Kılavuzu</h1>
+                <p>Unreal Engine, Arduino, ESP32 ve IoT Entegrasyon Stratejileri</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>📘 1. Vizyon: Oyuncu Değil, Sistem Mimarı Yetiştirmek</h2>
+            <p>Bu 38 projelik devasa sarmal müfredat, <strong>proje grubunun</strong> enerjisini salt oyun oynamaktan çıkarıp donanım, yazılım ve endüstriyel ağ protokollerini birleştiren <strong>Siber-Fiziksel Sistemler</strong> üretmeye yönlendirmek üzere tasarlanmıştır.</p>
+            <p>Laboratuvarınız artık basit bir "Bilişim Sınıfı" değil; sanal prodüksiyonların yapıldığı, medikal sensörlerin (EEG/EMG) denendiği ve otonom SCADA sistemlerinin (Radar/IoT) kurulduğu tam teşekküllü bir AR-GE merkezidir.</p>
+            
+            <div class="alert-box alert-info">
+                <h4>💡 Pedagojik Strateji: "Hata Ayıklama" Kültürü</h4>
+                <p>Eğitmen olarak en büyük rolünüz, bilgiyi doğrudan vermek yerine öğrencilere "Troubleshooting" (Hata Ayıklama) yeteneği kazandırmaktır. Prototip aşamalarında kodlarda veya devrelerde bilerek ufak hatalar bırakın (Örneğin Arduino'da yanlış baud rate, Blueprint'te bağlanmamış bir Exec pini). Sorunu kendileri çözdüklerinde öğrenme kalıcı hale gelir.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>⚙️ 2. Donanım, 3D Üretim ve Laboratuvar Standartları</h2>
+            <p>Fiziksel dünya ile sanal motorları birleştirirken karşılaşılan sorunların %70'i yazılıma değil, zayıf donanım kurulumuna ve parazitlere dayanır.</p>
+            
+            <div class="alert-box alert-danger">
+                <h4>🔥 Pro-Tip: Breadboard Tuzağı ve Kalıcı Üretim</h4>
+                <p>Jumper kablolar ve breadboard'lar sadece ilk 5 dakikalık testler içindir. Özellikle Joystick, Servo Motor veya titreşim motoru (Rumble) içeren hareketli projelerde temassızlıklar "Unreal Engine kodum çalışmıyor" yanılgısına yol açar. Atölyede <strong>lehimleme kültürü</strong> zorunlu tutulmalı; Robo90 veya Motorobit gibi tedarikçilerden sağlanabilecek kaliteli JST kablolar, barrel jack'ler ve kurşunsuz lehim telleri ile endüstriyel bağlantılar sağlanmalıdır.</p>
+            </div>
+
+            <div class="alert-box alert-warning">
+                <h4>⚠️ Pro-Tip: 3D Tasarım ve Biyomedikal İzolasyon</h4>
+                <p>Sensörlerin ve ESP32'lerin masada çıplak halde durması kısa devrelere sebep olur. Proje 20 (Kokpit) veya Proje 34 (Kamera Tracker) için öğrencilere <strong>Blender 4.5</strong> veya <strong>Fusion 360</strong> üzerinden özel muhafazalar tasarlatın. Baskıların aksamaması için Rhino3DPrinter üzerinden temin edilen teflon boruların, hotend'lerin ve nozzle temizleme iğnelerinin periyodik bakımları şarttır.</p>
+                <p style="margin-top: 10px;"><strong>Biyomedikal Not:</strong> EMG (MyoWare) ve EEG (NeuroSky) projelerinde, dizüstü bilgisayarınız şarja takılıysa şebekeden 50Hz'lik elektromanyetik gürültü (Noise) çeker. Saf sensör verisi almak için bilgisayarları her zaman <strong>pilde (şarjdan çekili)</strong> çalıştırın.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>📡 3. Haberleşme Mimarisi ve Ağ Güvenliği</h2>
+            <p>Unreal Engine ile mikrodenetleyicileri konuşturmanın sistem mimarisini doğru yönetmek, ileri seviye projelerin (Seviye 4, 5, 6) kilit noktasıdır:</p>
+            
+            <ul>
+                <li><strong>SerialCOM (USB):</strong> En stabil yöntemdir. <em>Kritik Kural:</em> Unreal Engine Blueprint'indeki "Baud Rate" (örn: 115200) ile Arduino'daki `Serial.begin()` değeri birebir aynı olmazsa Blueprint sadece anlamsız ASCII karakterleri okur.</li>
+                <li><strong>UDP Ağ Soketleri ve Güvenlik:</strong> Windows Güvenlik Duvarı (Firewall) UDP paketlerini genelde engeller. UDP dinleme portlarına (Örn: 8888) Inbound (Gelen) kuralları manuel eklenmelidir.</li>
+                <li><strong>ESP-NOW MAC Adresi Yönetimi:</strong> ESP-NOW (Proje 29) MAC adresleri üzerinden iletişim kurar. Sinyallerin laboratuvarda birbirine karışmaması için her masanın Alıcı/Verici MAC adreslerini beyaz tahtaya yazarak (MAC Mapping) yönetin.</li>
+            </ul>
+
+            <div class="alert-box alert-info">
+                <h4>🔐 Pro-Tip: Ağ Keşfi (Nmap) ve VLAN Yalıtımı</h4>
+                <p>Firebase veya Open-Meteo API'lerinin kullanıldığı web tabanlı projelerde API anahtarlarının (Secret Keys) korunması gerekir. Bu IoT cihazlarını kurumun ana ağından ayrı bir misafir (Guest/VLAN) ağında çalıştırın. Ayrıca UDP ve OSC düğümlerini (Nodes) ağda bulmak için <strong>Nmap</strong> veya <strong>Kali Linux</strong> laboratuvar pratiklerini öğrencilerle uygulamalı yaparak siber güvenlik vizyonu kazandırın.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 4. Unreal Engine Optimizasyon Stratejileri</h2>
+            <p>Oyun motorları sürekli veri dinlemek için değil, render almak için tasarlanmıştır. Dışarıdan saniyede 60 kez sensör verisi akarken Blueprint'lerin kilitlenmemesi gerekir.</p>
+
+            <div class="alert-box alert-danger">
+                <h4>🔥 Kritik Kural: "Event Tick" İstilası</h4>
+                <p>Ağ paketlerini (UDP/OSC) Blueprint içinde sürekli <strong>Event Tick</strong> ile dinleyip ayrıştırmak (Parse) işlemciyi yorar ve FPS'yi düşürür. Bunun yerine, <strong>Event On UDP Message Received</strong> gibi sadece veri geldiğinde tetiklenen (Event-Driven) asenkron düğümleri kullanın.</p>
+            </div>
+
+            <div class="alert-box alert-success">
+                <h4>💡 Pro-Tip: Çapraz Motor (Cross-Engine) Uyarlanabilirliği</h4>
+                <p>Bu müfredatın temelindeki veri alma mantığı evrenseldir. Atölyedeki oyun motoru yelpazesini genişletmek için <strong>Godot Engine 4.6</strong> entegrasyonuna geçiş yapabilirsiniz. Godot'nun GDScript yapısındaki <code>StreamPeerTCP/UDP</code> veya C# desteği sayesinde, öğrencilerin yazdığı Arduino kodlarına hiç dokunmadan Unreal projelerinin aynısını Godot'ta üretebilirsiniz.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🏆 5. Ekip Dağılımı ve Festival Vizyonu</h2>
+            <p>öğretmen-öğrenci hiyerarşisiyle değil, <strong>AR-GE Yöneticisi ve Mühendis</strong> ilişkisiyle yaklaşın. Dev Fiziksel Kaçış Odası (Proje 37) veya Sanal Prodüksiyon (Proje 33) gibi devasa bitirme projelerinde stüdyo mantığıyla iş bölümü yapın:</p>
+            
+            <ul>
+                <li><strong>Sistem Geliştiriciler:</strong> Unreal Engine Blueprint mantığı ve UI (UMG) ekranlarından sorumludurlar.</li>
+                <li><strong>Donanım Mühendisleri:</strong> Sensör kalibrasyonu, lehimleme, DMX bağlantıları ve 3D basımdan sorumludurlar.</li>
+                <li><strong>Network (Ağ) Yöneticileri:</strong> ESP32 IP tahsisleri, Firebase veritabanı kuralları ve ağ gecikmesi (Ping) optimizasyonlarından sorumludurlar.</li>
+            </ul>
+
+            <div class="alert-box alert-warning" style="border-color: var(--guide-color);">
+                <h4 style="color: var(--guide-color);">🚀 Digital Future Festival Çıktıları</h4>
+                <p>Dönem boyunca üretilen bu 38 proje, masaların üzerinde tozlanmamalıdır. AR, VR, 3D baskı ve siber güvenlik istasyonlarının yer aldığı teknoloji festivalleri için özel sergi konseptleri oluşturun. Festival alanında özellikle <strong>Zihin Gücüyle Telekinezi (Proje 32)</strong>, <strong>Dev DMX Sahne Işıkları (Proje 33)</strong> ve <strong>Fiziksel Kaçış Odası (Proje 37)</strong>, ziyaretçilerin aklını başından alacak "Odak Noktası (Centerpiece)" projeleridir.</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

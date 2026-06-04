@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 24: İki Yönlü IoT - Unreal Engine'den Röle Kontrolü</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Bulut) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+        .alert-danger { border-color: var(--danger-color); }
+        .alert-danger strong { color: var(--danger-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 24: İki Yönlü IoT</h1>
+                <p>Unreal Engine'den Gerçek Fiziksel Rölelere (Relay) Komut Akışı</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sanaldan Fiziğe Hükmetmek</h2>
+            <p>Bugüne kadar sensörlerden gelen verilerle Unreal Engine'deki olayları yönettik. Ancak Endüstri 4.0 ve akıllı ev (Smart Home) sistemlerinde oyun motorları aynı zamanda bir <strong>Kontrol Merkezi (SCADA)</strong> olarak kullanılır.</p>
+            <p>Bu projede işleri tersine çeviriyoruz! Unreal Engine içerisindeki sanal bir odada bulunan ışık düğmesine tıkladığınızda veya laboratuvarınızın 3 boyutlu dijital ikizinde bir vanayı çevirdiğinizde, oyun motoru Wi-Fi üzerinden (UDP) bir komut fırlatacak. Ağdaki ESP32 bu komutu yakalayacak ve üzerindeki fiziksel <strong>Röle (Relay)</strong> modülünü tetikleyerek gerçek dünyadaki bir masa lambasını, pervaneyi veya sireni çalıştıracaktır.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: ESP32 UDP Dinleyicisi ve Röle Bağlantısı</h2>
+            <p>Röleler, küçük voltajlarla (ESP32'nin 3.3V sinyali) büyük voltajlı ve akımlı cihazları açıp kapatmamızı sağlayan elektromekanik anahtarlardır. ESP32'nin D5 pinini, röle modülünün IN (Sinyal) pinine bağlayacağız.</p>
+
+            <div class="alert-box alert-danger">
+                <strong>🔥 ÖNEMLİ GÜVENLİK UYARISI!</strong> 
+                <p>Eğitim laboratuvarlarında ARGE ekibi ile çalışırken Röle'nin anahtarlama ucuna (COM ve NO pinlerine) ASLA doğrudan 220V Şebeke Elektriği (Priz elektriği) bağlamayın! Ölümcül elektrik çarpması riski vardır. Eğitim ve test aşamalarında daima <strong>9V piller, 12V LED şeritler veya 5V DC motorlar</strong> kullanın.</p>
+            </div>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Unreal Engine'den Gelen UDP Komutunu Dinleme ve Röle Tetikleme</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="comment">// Wi-Fi Ayarları</span>
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+
+<span class="comment">// UDP Ayarları</span>
+WiFiUDP udp;
+<span class="keyword">const int</span> localUdpPort = 8888; <span class="comment">// ESP32'nin dinleyeceği port</span>
+
+<span class="comment">// Röle Pini (D5)</span>
+<span class="keyword">const int</span> relayPin = 5;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  
+  <span class="comment">// Röle pinini ÇIKIŞ olarak ayarla ve başlangıçta kapalı tut</span>
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW); <span class="comment">// Röle modülünüz Low-Level Trigger ise HIGH yapın</span>
+
+  <span class="comment">// Wi-Fi'ye Bağlan</span>
+  WiFi.begin(ssid, password);
+  Serial.print(<span class="string">"Baglaniyor..."</span>);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print(<span class="string">"."</span>); }
+  
+  Serial.println(<span class="string">"\nBaglandi! IP Adresi: "</span>);
+  Serial.println(WiFi.localIP()); <span class="comment">// Unreal'da hedef olarak bu IP'yi yazacağız!</span>
+
+  <span class="comment">// UDP Dinlemeyi Başlat</span>
+  udp.begin(localUdpPort);
+  Serial.println(<span class="string">"UDP Dinleniyor..."</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">int</span> packetSize = udp.parsePacket();
+  
+  <span class="comment">// Eğer ağdan bir paket geldiyse</span>
+  <span class="keyword">if</span> (packetSize) {
+    <span class="keyword">char</span> gelenMesaj[255];
+    <span class="keyword">int</span> len = udp.read(gelenMesaj, 255);
+    <span class="keyword">if</span> (len > 0) gelenMesaj[len] = 0; <span class="comment">// Metnin sonunu belirle</span>
+    
+    String komut = String(gelenMesaj);
+    komut.trim(); <span class="comment">// Boşlukları temizle</span>
+    
+    Serial.println(<span class="string">"Unreal'dan Gelen Komut: "</span> + komut);
+
+    <span class="comment">// Komutlara Göre Röleyi Aç/Kapat</span>
+    <span class="keyword">if</span> (komut == <span class="string">"LAMBA_AC"</span>) {
+      digitalWrite(relayPin, HIGH);
+      Serial.println(<span class="string">"-> Röle AÇILDI"</span>);
+    } 
+    <span class="keyword">else if</span> (komut == <span class="string">"LAMBA_KAPAT"</span>) {
+      digitalWrite(relayPin, LOW);
+      Serial.println(<span class="string">"-> Röle KAPATILDI"</span>);
+    }
+  }
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 IP Adresi Notu:</strong> ESP32'nin Seri Monitörde (115200 baud) yazdırdığı IP adresini (Örn: <code>192.168.1.45</code>) bir kenara not edin. Blueprint'te paketi tam olarak bu adrese yollayacağız.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Karar ve Gönderim Merkezi</h2>
+            <p>Oyun motorunda bir düğmeye basıldığında veya karakter bir "Trigger Box" alanına girdiğinde UDP üzerinden "LAMBA_AC" metnini ağa fırlatacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Blueprint Ağı (Gönderim):</h3>
+            <ol>
+                <li><strong>Tetikleyici (Event):</strong> Bir UMG (Kullanıcı Arayüzü) oluşturun ve içine büyük bir buton ekleyin. Butonun <span class="bp-event">On Clicked</span> event'ini çağırın. (Alternatif olarak <code>G</code> tuşuna basılma event'ini de kullanabilirsiniz).</li>
+                
+                <li><strong>Durum Kontrolü (Flip Flop):</strong> <span class="bp-event">On Clicked</span> pininden çıkıp bir <span class="bp-flow">Flip Flop</span> düğümüne bağlayın. Bu düğüm, butona ilk tıklandığında (A) yolunu, ikinci tıklandığında (B) yolunu çalıştırır. (Aç / Kapat mantığı).</li>
+
+                <li><strong>Ağ Paketini Fırlatmak (Send UDP):</strong> 
+                    <ul>
+                        <li>(A) çıkışından kablo çekin ve eklentinizin sunduğu <span class="bp-func">Send UDP Message</span> (veya Send String over UDP) düğümünü çağırın.</li>
+                        <li><strong>Target IP:</strong> ESP32'nizin IP adresi (Örn: <code>192.168.1.45</code>).</li>
+                        <li><strong>Target Port:</strong> <code>8888</code> (ESP32 koduna yazdığımız port).</li>
+                        <li><strong>Message:</strong> <code>LAMBA_AC</code> yazın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Kapatma Sinyali:</strong>
+                    <ul>
+                        <li>Flip Flop'un (B) çıkışından kablo çekip kopyaladığınız ikinci bir <span class="bp-func">Send UDP Message</span> düğümüne bağlayın.</li>
+                        <li>IP ve Port aynı kalacak. Sadece <strong>Message</strong> kutusuna <code>LAMBA_KAPAT</code> yazın.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Ağ Eklentisi (Plugin) Gereksinimi:</strong> Unreal Engine çekirdeğinde veriyi ham UDP olarak dışarı atmak için C++ kodlarına ihtiyaç duyulur. Geliştiricilerinizin (Blueprint kullananların) işini kolaylaştırmak için Epic Marketplace'ten ücretsiz olarak "UDP Messaging" veya "TCP Socket Plugin" kurduğunuzdan ve <code>String to Bytes</code> dönüşümlerini doğru yaptığınızdan emin olun.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Acil Durum / Siren Sistemi</h2>
+            <p>ekibinizi heyecanlandıracak mükemmel bir senaryo:</p>
+            <p>laboratuvarın duvarına, 12V ile çalışan döner bir polis/itfaiye sireni (tepe lambası) monte edin. Bu sirenin güç hattını ESP32 rölesi üzerinden geçirin. </p>
+            <p>Unreal Engine içerisinde karanlık, gizlilik (Stealth) odaklı bir görev hazırlayın. Eğer sanal dünyadaki karakteriniz güvenlik kameralarına yakalanırsa veya canı (HP) sıfıra düşüp oyun biterse (Game Over), oyun motoru anında "SIREN_CAL" komutunu göndersin. Laboratuvardaki gerçek kırmızı sirenler dönmeye ve ötmeye başladığında, siber-fiziksel sistemlerin oyuncu üzerindeki psikolojik ve sarmalayıcı (Immersive) etkisini tüm ekibiniz iliklerine kadar hissedecektir!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

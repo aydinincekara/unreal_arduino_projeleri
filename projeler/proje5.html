@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 5: Dinamik Gece/Gündüz Döngüsü - Unreal Engine & LDR</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #12151f 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--ue-blue);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--ue-blue); color: #fff; border-color: var(--ue-blue); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--ue-blue); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--ue-blue);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--ue-blue); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 5: Dinamik Gece/Gündüz Döngüsü</h1>
+                <p>LDR Sensörü ile Unreal Sahne Aydınlatmasını Kontrol Etmek</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Odanın Işığına Tepki Veren Güneş</h2>
+            <p>Unreal Engine 5'in devasa açık dünyalarında (Open World) Güneş ışığı genellikle "Directional Light" (Yönlü Işık) adlı bir aktör tarafından kontrol edilir. Bu ışığın açısını (Pitch/Y ekseni) değiştirdiğinizde, motorun yerleşik Gökyüzü Atmosferi (Sky Atmosphere) sistemi bunu algılar ve otomatik olarak gün batımı kızıllığına veya gece karanlığına geçer.</p>
+            
+            <p>ARGE ekibimizle bu projede, ucuz ve etkili bir LDR (Fotodirenç) sensörünü okuyup, laboratuvarın gerçek ışık miktarını oyun içindeki güneşin X/Y rotasyonuna yansıtacağız.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Arduino Kodu</h2>
+            <p>LDR, ışığa göre direnci değişen bir elemandır. Onu tek başına bağlayamayız; bir ucu 5V'a giderken, diğer ucu <strong>10K Ohm'luk</strong> bir direnç üzerinden GND'ye gitmelidir (Voltaj Bölücü - Voltage Divider). İkisinin birleştiği orta noktadan ise Arduino'nun <strong>A0</strong> analog pinine bir kablo çekeriz.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: LDR Işık Verisini Oku</span>
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600); 
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// A0 pininden ortamın aydınlık seviyesini oku (0: Zifiri Karanlık, 1023: Tam Aydınlık)</span>
+  <span class="keyword">int</span> isikDegeri = analogRead(A0);
+  
+  <span class="comment">// Sensördeki ufak titremeleri ve parazitleri filtrelemek için </span>
+  <span class="comment">// okunan değeri 10'a bölebiliriz, ama ham veriyi göndermek Unreal'da </span>
+  <span class="comment">// daha ince ayar yapmamızı sağlar. Bu yüzden doğrudan gönderiyoruz.</span>
+  
+  <span class="comment">// Veriyi Unreal Engine'e gönder (ln zorunludur)</span>
+  Serial.println(isikDegeri); 
+  
+  delay(50); <span class="comment">// Göz yormayacak yumuşak bir geçiş için 50ms bekle</span>
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Unreal Engine sahnesinde zaten var olan <strong>Directional Light</strong> objesini Blueprint kodumuza dahil etmemiz gerekiyor. Bunun için Level Blueprint'i kullanmak en kolayıdır.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Güneşi Referans Almak:</strong> UE5 editöründe sahnedeki <em>Directional Light</em> aktörüne bir kez tıklayın. Ardından üst menüden Blueprint ikonuna tıklayıp <strong>Open Level Blueprint</strong> deyin. Ekranda boş bir yere sağ tıklayıp <strong>Create a Reference to Directional Light</strong> seçeneğine tıklayın. (Güneşin kontrolünü kod ekranımıza aldık).</li>
+                
+                <li><strong>Veriyi Okumak ve Oranlamak:</strong> <span class="bp-event">Event Tick</span> ve <span class="bp-func">Read Line</span> ile LDR verimizi (String) alıp Float'a çeviriyoruz. Bunu hemen <span class="bp-pure">Map Range Clamped</span> düğümüne bağlayın.
+                    <ul>
+                        <li><strong>In Range A:</strong> 100 (Oda Karanlıkken LDR Değeri)</li>
+                        <li><strong>In Range B:</strong> 900 (Oda Aydınlıkken LDR Değeri)</li>
+                        <li><strong>Out Range A:</strong> -90.0 (Güneş tam tepede - Öğlen vakti)</li>
+                        <li><strong>Out Range B:</strong> 0.0 (Güneş ufuk çizgisinde - Gün batımı/Gece)</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Güneşi Döndürmek:</strong> İlk başta oluşturduğumuz Directional Light referansından mavi bir kablo çekin ve <span class="bp-func">Set Actor Rotation</span> düğümünü çağırın. 
+                    <ul>
+                        <li>Düğümdeki <em>New Rotation</em> pinine sağ tıklayıp <strong>Split Struct Pin</strong> deyin.</li>
+                        <li>Map Range Clamped'den çıkan sonucu, X, Y veya Z eksenlerinden <strong>Y (Pitch)</strong> eksenine bağlayın.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Önemli Ayar (Mobility):</strong> Directional Light aktörünün özelliklerinde (Details paneli) Mobility ayarının <strong>Movable</strong> (Hareketli) olarak ayarlandığından emin olun. "Static" ışıklar oyun sırasında döndürülemez!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı ve Meydan Okuma</h2>
+            <p>Play tuşuna basın. Telefonunuzun flaşını LDR'ye tuttuğunuzda Unreal sahnesinde güneşin en tepeye çıktığını ve gölgelerin kısaldığını göreceksiniz. Elinizle sensörü kapattığınızda ise mükemmel bir gün batımı kızıllığı oluşacak ve ardından sahne karanlığa gömülecektir.</p>
+            
+            <div class="alert-box alert-info">
+                <strong>Geliştirme Görevi (Sokak Lambaları):</strong> Öğrencilerinizden sahnede birkaç tane <em>Point Light</em> (Nokta Işık / Sokak lambası) oluşturmalarını isteyin. LDR'den gelen değer 300'ün altına düştüğünde (Hava karardığında) bir <strong>Branch (If)</strong> komutuyla bu sokak lambalarının <em>Visibility</em> (Görünürlük) özelliğini aktif eden, aydınlandığında ise kapatan bir "Otomatik Şehir Aydınlatması" sistemi kursunlar!
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

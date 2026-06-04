@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 7: Fiziksel Direksiyon - MPU6050 ve Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level2: #e67e22; /* Seviye 2 Turuncusu */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1f1105 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level2);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level2); color: #000; border-color: var(--level2); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level2); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level2);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level2); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-array { background: linear-gradient(180deg, #8e44ad 0%, #5b2c6f 100%); border-color: #9b59b6; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 7: Fiziksel Direksiyon</h1>
+                <p>MPU6050 İvmeölçer ile Blueprint Karakter Yönlendirme</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Kendi Uçuş Simülatörümüz</h2>
+            <p>Unreal Engine'de karakter kontrolü klavye (WASD) veya gamepad (Thumbstick) üzerinden Axis Mapping (Eksen Haritalama) ile yapılır. Bu projede, masamızdaki MPU6050 (İvmeölçer/Jiroskop) sensörünü bir uçak löyesi gibi kullanacağız. Sensörü sağa yatırdığımızda uçağımız sağa yatacak (Roll), öne eğdiğimizde uçağımız aşağı dalacak (Pitch).</p>
+            
+            <p>İlk defa iki veriyi (X ve Y ekseni eğimleri) aynı anda okuyup, bunları Unreal Engine içerisinde virgüllerinden ayıracağız (String Parsing).</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Arduino Kodu (I2C Haberleşme)</h2>
+            <p>MPU6050 sensörü Arduino ile <strong>I2C</strong> protokolü üzerinden haberleşir. Bağlantılar: VCC->5V, GND->GND, <strong>SDA->A4</strong>, <strong>SCL->A5</strong>. İşleri kolaylaştırmak için Arduino IDE üzerinden <code>Adafruit_MPU6050</code> ve <code>Adafruit_Sensor</code> kütüphanelerini kurmanız gerekmektedir.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: MPU6050 Eksen Verilerini Paketleme</span>
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_MPU6050.h&gt;
+#include &lt;Adafruit_Sensor.h&gt;
+
+Adafruit_MPU6050 mpu;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  <span class="comment">// MPU6050'yi başlatmayı deniyoruz</span>
+  <span class="keyword">if</span> (!mpu.begin()) {
+    <span class="keyword">while</span> (1) {
+      delay(10);
+    }
+  }
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Sensörden ivme, jiroskop ve sıcaklık verilerini al</span>
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+  <span class="comment">// İvme değerleri m/s^2 cinsindendir. Genelde -10 ile +10 arasında değişir.</span>
+  <span class="keyword">float</span> egimX = a.acceleration.x; 
+  <span class="keyword">float</span> egimY = a.acceleration.y;
+
+  <span class="comment">// ÇOKLU VERİ PAKETLEME: "X,Y\n" formatında gönderiyoruz</span>
+  Serial.print(egimX);
+  Serial.print(",");
+  Serial.println(egimY); <span class="comment">// İkinci verinin sonuna println (Enter) atıyoruz!</span>
+  
+  delay(20); <span class="comment">// 50Hz veri akışı</span>
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Sahnemizde kontrol edebildiğimiz bir aktör (Pawn) oluşturalım, içine bir "Static Mesh" (Uçak veya Küp modeli) ekleyelim. Gelen <code>"5.2,-3.4"</code> tarzındaki metni iki ayrı sayıya böleceğiz.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Veriyi Parçalamak (Parsing):</strong> <span class="bp-event">Event Tick</span> -> <span class="bp-func">Read Line</span> ile metni okuyun. Sarı String pininden kablo çekin ve <span class="bp-array">Parse Into Array</span> düğümünü bulun. 
+                    <ul>
+                        <li><strong>Delimiter (Ayırıcı):</strong> Bu kutuya virgül <code>,</code> yazın. Bu düğüm, metni virgüllerden kırparak bir liste (Array) oluşturur.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Dizi (Array) Elemanlarını Almak:</strong> Parse Into Array düğümünün çıkışındaki kare pininden kablo çekin ve <span class="bp-array">Get (a copy)</span> düğümünü iki kez çağırın.
+                    <ul>
+                        <li>Birinci <em>Get</em> düğümünün indeksini <strong>0</strong> yapın (Bu bizim X ivmemiz).</li>
+                        <li>İkinci <em>Get</em> düğümünün indeksini <strong>1</strong> yapın (Bu bizim Y ivmemiz).</li>
+                        <li>Her ikisini de <span class="bp-pure">To Float</span> ile ondalıklı sayıya çevirin.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Optimizasyon ve Dönüştürme:</strong> Arduino'dan gelen -10 ile +10 arasındaki ivme değerlerini, uçuş rotasyonuna çevirmek için her iki değeri de ayrı ayrı <span class="bp-pure">Map Range Clamped</span> düğümlerine bağlayın.
+                    <ul>
+                        <li><strong>In Range A / B:</strong> -10.0 ve 10.0</li>
+                        <li><strong>Out Range A / B:</strong> -45.0 ve 45.0 (Uçak maksimum 45 derece yatsın)</li>
+                    </ul>
+                </li>
+
+                <li><strong>Aktörü Döndürmek:</strong> Event Tick'in beyaz akış kablosunu alın ve <span class="bp-func">Set Actor Relative Rotation</span> düğümüne bağlayın. 
+                    <ul>
+                        <li><em>New Rotation</em> pinine sağ tıklayıp <strong>Split Struct Pin</strong> deyin.</li>
+                        <li>X ekseninden gelen değeri <strong>Roll (Yatma)</strong> eksenine bağlayın.</li>
+                        <li>Y ekseninden gelen değeri <strong>Pitch (Eğilme)</strong> eksenine bağlayın.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>💡 Array Index Hatası Almamak İçin:</strong> Bazen Arduino bağlantısı ilk başladığında eksik paketler (Sadece virgül olmadan "5") gönderebilir. Parse Into Array işleminden hemen sonra bir <span class="bp-pure">Length</span> düğümü ile dizinin eleman sayısının <strong>2'ye eşit (==)</strong> olup olmadığını bir <span class="bp-flow">Branch</span> ile kontrol etmek, oyunun çökmesini (Out of Bounds hatası) engeller!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Kokpit Simülasyonu</h2>
+            <p>Bu proje çalıştığında, laboratuvardaki gençler sensörü ellerinde havada çevirirken ekrandaki uzay gemisinin birebir aynı hareketleri yaptığını görecekler. Bu, VR (Sanal Gerçeklik) kontrolcülerinin temel çalışma prensibidir!</p>
+            
+            <p><strong>ARGE Ekibi Meydan Okuması:</strong> Sadece uçağı yatırmakla kalmayın. Uçağın arkasına bir itici gücü (Forward Vector hızlanması) ekleyin. X eksenindeki ivme (Pitch) uçağı aşağı eğdiğinde uçak hızlansın, yukarı kaldırdığında yavaşlasın!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

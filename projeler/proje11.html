@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 11: Sanal Sandık, Gerçek Kilit - Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level2: #e67e22; /* Seviye 2 Turuncusu */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1f1105 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level2);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level2); color: #000; border-color: var(--level2); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level2); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level2);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level2); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 11: Sanal Sandık, Gerçek Kilit</h1>
+                <p>Servo Motor ile Unreal'dan Fiziksel Kilit Açma Mekanizması</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Sanal Ganimet, Fiziksel Ödül</h2>
+            <p>Oyunlarda sandık açma (Loot) mekaniği, oyunculara en çok tatmin veren anlardan biridir. Bu deneyimi 4. duvarı yıkarak gerçek hayata taşıyoruz. Unreal Engine'de karakterimiz bir hazine sandığına yaklaşıp etkileşim tuşuna ('E') bastığında, oyun motoru Arduino'ya "Aç" komutu gönderecek.</p>
+            <p>Arduino, üzerindeki mikro SG90 Servo motoru 90 derece döndürerek masamızda bulunan fiziksel ahşap bir kutunun mandalını serbest bırakacak ve kutu açılacaktır.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: SG90 Servo Motor</h2>
+            <p>Servo motorların üç kablosu vardır: Kahverengi (GND), Kırmızı (5V) ve Turuncu (Sinyal). Sinyal kablosunu Arduino'nun PWM (~) destekli bir pinine, örneğin <strong>Pin 9</strong>'a bağlayacağız.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Unreal'dan Gelen Komutla Servo Döndürme</span>
+#include &lt;Servo.h&gt; <span class="comment">// Servo kontrol kütüphanesi</span>
+
+Servo kilitMotoru;
+<span class="keyword">const int</span> servoPin = 9;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  kilitMotoru.attach(servoPin); <span class="comment">// Motoru 9. pine ata</span>
+  
+  <span class="comment">// Başlangıçta kilit kapalı pozisyonda (0 derece) olsun</span>
+  kilitMotoru.write(0); 
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Unreal Engine'den komut gelip gelmediğini kontrol et</span>
+  <span class="keyword">if</span> (Serial.available() > 0) {
+    <span class="keyword">char</span> komut = Serial.read();
+    
+    <span class="comment">// 'A' (AÇ) komutu geldiyse motoru 90 dereceye getir (Kilidi aç)</span>
+    <span class="keyword">if</span> (komut == 'A') {
+      kilitMotoru.write(90);
+    }
+    <span class="comment">// 'K' (KAPAT) komutu geldiyse motoru 0 dereceye getir (Kilitle)</span>
+    <span class="keyword">else if</span> (komut == 'K') {
+      kilitMotoru.write(0);
+    }
+  }
+}</pre>
+            </div>
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Güç Yönetimi:</strong> SG90 küçük bir motor olsa da, eğer çok zorlanan veya sıkışan ağır bir kilidi açmaya çalışırsa Arduino'nun 5V pininden aşırı akım çekerek bilgisayarın USB portunu dondurabilir. Motor zorlanıyorsa harici bir 5V adaptör kullanmayı unutmayın!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Sahnemizde <code>BP_Sandik</code> adında bir Blueprint Actor oluşturalım. İçine bir sandık modeli ve bir <strong>Box Collision</strong> (Etkileşim Alanı) ekleyelim. Oyuncu bu kutunun içindeyken "E" tuşuna basarsa komut gönderilecek.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Etkileşimi Aktif Etmek:</strong> Sandığın içine oyuncu girdiğinde tuş basımlarını dinleyebilmemiz gerekir. <span class="bp-event">On Component Begin Overlap (Box)</span> düğümünden <span class="bp-func">Enable Input</span> (Girdiyi Etkinleştir) düğümünü çağırın ve Player Controller'ı bağlayın. Çıkıldığında ise <span class="bp-event">On Component End Overlap</span> üzerinden <span class="bp-func">Disable Input</span> ile kapatın.</li>
+                
+                <li><strong>'E' Tuşuna Basılması:</strong> Boş bir yere sağ tıklayıp <strong>Keyboard E</strong> (veya tanımladığınız bir Action Mapping) düğümünü çağırın. Bu düğümün <em>Pressed</em> pininden kablo çekin.</li>
+                
+                <li><strong>Aç/Kapat Geçişi (Flip Flop):</strong> Sandığı aynı tuşla hem açıp hem kapatabilmek için <span class="bp-flow">Flip Flop</span> düğümünü kullanın.
+                    <ul>
+                        <li><strong>A Çıkışı (İlk Basış - Aç):</strong> <span class="bp-func">Write String</span> düğümünü bağlayın. String kutusuna <code>A</code> yazın. Ayrıca sanal sandığın kapağını açan animasyonu (Timeline ile) burada başlatabilirsiniz.</li>
+                        <li><strong>B Çıkışı (İkinci Basış - Kapat):</strong> Başka bir <span class="bp-func">Write String</span> düğümü bağlayın. String kutusuna <code>K</code> yazın.</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Gerçek Ganimetler</h2>
+            <p>Bu proje, atölyenizi ziyaret eden konuklar veya öğrenciler için muazzam bir "Wow Effect" (Şaşırtma Etkisi) yaratır. Projeyi daha eğlenceli hale getirmek için fiziksel kutunun içine gençlerin seveceği ufak ödüller (şeker, çıkartma vb.) koyabilirsiniz. Oyunda gizli bir bulmacayı çözüp sandığı bulan öğrenci, masasında fiziksel kutunun <em>"tık"</em> sesiyle açılmasıyla büyük bir tatmin yaşayacaktır.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 18: Fiziksel Nişangah - Lazer ve Unreal Engine</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level3: #2ecc71; /* Seviye 3 Yeşili */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #0b1f15 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level3);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level3); color: #000; border-color: var(--level3); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level3); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level3);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level3); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 18: Fiziksel Nişangah</h1>
+                <p>Lazer ve Fotodirenç ile Raycast (Line Trace) Silah Mekaniği</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Lazer ile Sanal Dünyayı Vurmak</h2>
+            <p>Nişancı (Shooter) oyunlarında merminin nereye gideceğini hesaplamak için Unreal Engine <strong>Line Trace (Işın İzleme/Raycast)</strong> yöntemini kullanır. Silahın namlusundan görünmez bir lazer çıkar, çarptığı ilk objenin bilgisini bize getirir.</p>
+            <p>Bu projede sanal lazere fiziksel bir tetikleyici ekliyoruz. Masamızdaki hedef tahtasının ortasında duran LDR (Fotodirenç) sensörüne gerçek bir lazer işaretleyici (Laser Pointer) tutulduğunda, Unreal Engine'deki silahımız ateş edecek ve sanal hedefleri vuracaktır.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: LDR ve Keskin Işık Tespiti</h2>
+            <p>Proje 5'te LDR'yi ortam ışığını ölçmek için (Gece/Gündüz) kullanmıştık. Lazerin LDR üzerine düşürdüğü ışık, ortam ışığından çok daha keskin ve şiddetlidir. LDR'yi bir 10K direnç ile Voltaj Bölücü (Voltage Divider) olarak bağlayıp <strong>A0</strong> analog pininden okuyacağız. </p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Lazer İsabet Algılama</span>
+<span class="keyword">const int</span> ldrPin = A0;
+
+<span class="comment">// Odanın normal aydınlığına göre bu eşik değerini değiştirebilirsiniz.</span>
+<span class="comment">// Lazer tam sensöre vurduğunda değer genellikle 850-950 arasına fırlar.</span>
+<span class="keyword">const int</span> isabetEsigi = 800; 
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">int</span> isikSiddeti = analogRead(ldrPin);
+
+  <span class="comment">// Lazer LDR'ye isabet ettiyse!</span>
+  <span class="keyword">if</span> (isikSiddeti > isabetEsigi) {
+    <span class="comment">// Unreal Engine'e "VURULDU" sinyali gönder</span>
+    Serial.println(<span class="string">"HIT"</span>);
+    
+    <span class="comment">// Taramalı tüfek gibi saniyede 10 kere algılamasın diye yarım saniye bekle</span>
+    delay(500); 
+  }
+  
+  delay(10); <span class="comment">// Hızlı tarama için kısa bekleme</span>
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Kalibrasyon İpucu:</strong> Gündüz güneş alan bir odadaysanız LDR zaten 800 değerine ulaşabilir. Bu durumda LDR'nin etrafına siyah kartondan ufak bir boru (namlu/siperlik) yaparak sadece tam karşıdan gelen lazeri görmesini sağlayabilirsiniz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Karakterimizin (veya silahımızın) Blueprint dosyasına girelim. Arduino'dan "HIT" sinyali geldiğinde silahın ucundan hedefe doğru bir çizgi (Line Trace By Channel) çizeceğiz.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Sinyali Yakalama:</strong> <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> ile okunan metni <span class="bp-pure">Trim</span> yapın. Çıkan sonucu <span class="bp-pure">Equal (String)</span> düğümü ile <code>HIT</code> kelimesine eşitleyin. Sonucu bir <span class="bp-flow">Branch</span>'e bağlayın.</li>
+                
+                <li><strong>Işın İzlemeyi Başlat (Line Trace):</strong> Branch True olduğunda <span class="bp-func">Line Trace By Channel</span> düğümünü çağırın. Bu düğümün iki kritik girişi vardır: Başlangıç noktası (Start) ve Bitiş noktası (End).</li>
+                
+                <li><strong>Matematik (Merminin Rotası):</strong>
+                    <ul>
+                        <li>Karakterinizin kamerasını (veya silah namlusunu) referans olarak sahneye çekin.</li>
+                        <li>Ondan <span class="bp-pure">Get World Location</span> (Kameranın konumu) düğümünü bağlayın. Bunu Line Trace'in <strong>Start</strong> pinine bağlayın.</li>
+                        <li>Yine kameradan <span class="bp-pure">Get Forward Vector</span> (Kameranın baktığı yön) düğümünü çekin. Bu yön vektörünü <span class="bp-pure">Multiply (Vector * Float)</span> düğümü ile silahınızın menziline (Örn: 5000) çarpın.</li>
+                        <li>Çıkan sonucu <em>Start</em> konumuyla toplayın (<span class="bp-pure">Add Vector</span>). Bunu Line Trace'in <strong>End</strong> pinine bağlayın.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Vurulan Obje İle Etkileşim:</strong> Line Trace düğümünün <em>Out Hit</em> (Vurulan yer) pininden kablo çekip <strong>Break Hit Result</strong> deyin. Çıkan <em>Hit Actor</em> pinini alıp <span class="bp-func">Apply Damage</span> (Hasar ver) veya <span class="bp-func">Destroy Actor</span> (Yok et) düğümlerine bağlayarak sanal düşmanları indirebilirsiniz!</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Işını Görmek İçin:</strong> Başlangıçta merminin nereye gittiğini göremeyebilirsiniz. Line Trace düğümündeki <strong>Draw Debug Type</strong> ayarını <em>For Duration</em> yaparsanız, silah ateşlediğinde kırmızı lazer çizgisinin (Raycast) ekranda çizildiğini göreceksiniz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Hareketli Hedefler</h2>
+            <p>15-30 yaş grubundaki ARGE ekibinizin oyun mekaniği becerilerini zorlamak için bu projeyi Proje 11 (Servo Motor) ile birleştirin!</p>
+            <p><strong>Büyük Görev:</strong> Masadaki LDR sensörünü bir Servo Motor'un ucuna yapıştırın. Arduino kodu ile bu hedef sürekli sağa ve sola hareket etsin (Atari salonlarındaki ördek vurma oyunu gibi). Öğrenciler elindeki fiziksel lazerle hareket eden bu hedefe isabet ettirdiğinde, Unreal Engine'de çok zorlu bir bölümün kapısı açılsın!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

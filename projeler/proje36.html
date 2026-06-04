@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 36: Sanal Prodüksiyon - Otonom Robot Radar Sistemi</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level6: #f1c40f; /* Seviye 6 Altın/Sarı (Prodüksiyon/Final) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #332a00 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level6);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level6); color: #000; border-color: var(--level6); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level6); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level6);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level6); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-struct { background: linear-gradient(180deg, #2980b9 0%, #1f618d 100%); border-color: #3498db; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 36: Otonom Robot Radarı</h1>
+                <p>İnsansız Araçların (İKA) Konumlarını Unreal Engine Üzerinde Anlık Takip Etmek</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Komuta Kontrol Merkezi</h2>
+            <p>Fabrikalarda dolaşan otonom kargo taşıyıcılarını (AGV) veya savunma sanayiindeki insansız kara araçlarını (İKA) düşünün. Operatörler bu araçları pencereden bakarak değil, önlerindeki dijital haritalar ve radar ekranları (SCADA) üzerinden takip ederler.</p>
+            <p>Bu projede, üzerine ESP32 taktığımız fiziksel bir robot araba, hareket ettikçe tahmini X (İleri/Geri), Y (Sağ/Sol) ve Yaw (Yönelim Açısı) değerlerini Wi-Fi üzerinden Unreal Engine'e fırlatacak. Oyun motorumuzdaki sahnede, laboratuvarın tepeden görünen bir haritası olacak ve robotun 3 boyutlu dijital ikizi gerçek dünyayla birebir aynı hareketleri sergileyecektir.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Odometri ve Konum Verisi (UDP)</h2>
+            <p>Gerçek bir projede X ve Y koordinatları tekerleklere bağlı enkoderlerden (Tekerleğin kaç tur döndüğünü sayan optik sensörler) ve bir pusula modülünden elde edilir. Kavramı test etmek için ESP32'de basit bir matematiksel konum simülasyonu hazırlayalım ve bu koordinatları UDP üzerinden paketleyelim.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Robot Konum Verisi Gönderimi</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>;
+<span class="keyword">const int</span> unrealPort = 8888;
+
+WiFiUDP udp;
+
+<span class="comment">// Robotun Başlangıç Koordinatları (cm cinsinden)</span>
+<span class="keyword">float</span> robotX = 0.0;
+<span class="keyword">float</span> robotY = 0.0;
+<span class="keyword">float</span> robotAngle = 0.0; <span class="comment">// Yönelim Açısı (0-360)</span>
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Gelişmiş projelerde buradaki değerler tekerlek enkoderi, GPS </span>
+  <span class="comment">// veya Kapalı Alan Konumlandırma (UWB) sensörlerinden okunur.</span>
+  <span class="comment">// Simülasyon için robotu yavaşça çapraz hareket ettiriyoruz:</span>
+  robotX += 0.5; 
+  robotY += 0.2;
+  robotAngle = 15.0; 
+
+  <span class="comment">// Veriyi Paketle (Format: RADAR, X, Y, Açı)</span>
+  <span class="comment">// Örnek Çıktı: "RADAR,120.5,45.2,15.0"</span>
+  String veriPaketi = <span class="string">"RADAR,"</span> + String(robotX) + <span class="string">","</span> + String(robotY) + <span class="string">","</span> + String(robotAngle);
+  
+  udp.beginPacket(unrealIP, unrealPort);
+  udp.print(veriPaketi);
+  udp.endPacket();
+
+  delay(50); <span class="comment">// Saniyede 20 kez konum güncellemesi</span>
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Gerçek Odometri (Odometry):</strong> Tekerleğin çevresini ölçüp (Örn: 20 cm), motorun bir turunda robotun 20 cm ilerlediğini hesaplama işlemine "Ölü Hesaplama (Dead Reckoning)" denir. Profesyonel İKA donanımlarının çekirdek matematiği budur.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Unreal Engine Dijital İkiz (Digital Twin) Aktörü</h2>
+            <p>Oyun dünyasında 1 Birim (Unit), genellikle 1 Santimetreye (cm) eşittir. ESP32'den gelen 120 değerini doğrudan 120 cm olarak sahnedeki modele yansıtacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Paketi Okuma ve Filtreleme:</strong>
+                    <ul>
+                        <li><span class="bp-event">Event On UDP Message Received</span> düğümünü <span class="bp-func">Parse Into Array</span> ile virgüllerden ayırın.</li>
+                        <li><span class="bp-array">Get (0)</span> pininin <code>RADAR</code> kelimesine eşit olup olmadığını <span class="bp-flow">Branch</span> ile doğrulayın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Konum Vektörünü Oluşturma:</strong>
+                    <ul>
+                        <li><span class="bp-array">Get (1)</span> (X değeri) ve <span class="bp-array">Get (2)</span> (Y değeri) pinlerini alıp <span class="bp-pure">To Float</span> yapın.</li>
+                        <li>Bu değerleri bir <span class="bp-struct">Make Vector</span> düğümünün X ve Y girişlerine takın. Z (Yükseklik) girişine robotun sahnedeki mevcut yüksekliğini (Get Actor Location Z) verebilirsiniz ki robot yerin altına girmesin.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Açı (Rotator) Oluşturma:</strong>
+                    <ul>
+                        <li><span class="bp-array">Get (3)</span> (Açı değeri) pinini <span class="bp-pure">To Float</span> yapıp, bir <span class="bp-struct">Make Rotator</span> düğümünün <strong>Yaw (Z ekseni etrafında dönüş)</strong> girişine takın.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Aktörü Güncelleme:</strong>
+                    <ul>
+                        <li>Sahnede bulunan Robot Aktörünüzün (Örn: BP_OtonomRobot) referansını çekin.</li>
+                        <li>Bundan bir kablo uzatarak <span class="bp-func">Set Actor Location And Rotation</span> düğümünü çağırın.</li>
+                        <li>Make Vector'den çıkan konumu ve Make Rotator'dan çıkan açıyı ilgili pinlere bağlayın. Robot artık fiziksel eşiyle aynı konumda!</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Titreme Giderme (Interpolation):</strong> Ağ paketleri bazen gecikebilir ve robot ekranda ışınlanıyormuş (teleport) gibi atlayarak ilerleyebilir. Daha profesyonel bir görünüm için, "Set Actor Location" kullanmak yerine, <span class="bp-pure">VInterp To</span> (Vector Interpolation) düğümünü kullanarak hedef koordinata yumuşak bir şekilde süzülmesini sağlayabilirsiniz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Mayın Tarlası / Labirent Keşfi</h2>
+            <p>ARGE takımınızla teknoloji geliştirmenin zirvesine ulaşın.</p>
+            <p>Odanın ortasına mukavvalardan veya tahtalardan bir labirent kurun. Unreal Engine sahnemizde, bu labirentin sadece zemin planı (Floor Plan) olsun ve Unreal'daki kamerayı tam tepeden (Top-Down View) bakacak şekilde ayarlayın. Ekip üyelerinden biri otonom robotu veya RC aracı labirentin içine bıraksın. Diğer üyeler ekrandaki radar arayüzüne bakarak, robotun labirentin neresinde olduğunu milimetrik olarak takip etsin. Bu, modern dronların (UAV) ve kargo robotlarının endüstriyel takip merkezlerinde kullanılan sistemin tamamen aynısıdır!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

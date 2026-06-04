@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 8: Gerçek Sürüş Hissi - Joystick ve Chaos Vehicles</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level2: #e67e22; /* Seviye 2 Turuncusu */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1f1105 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level2);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level2); color: #000; border-color: var(--level2); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level2); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level2);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level2); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-array { background: linear-gradient(180deg, #8e44ad 0%, #5b2c6f 100%); border-color: #9b59b6; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 8: Gerçek Sürüş Hissi</h1>
+                <p>Analog Joystick ile Chaos Vehicles Araç Fiziği Kontrolü</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Kendi Yarış Simülatörümüz</h2>
+            <p>Unreal Engine 5 ile birlikte araç fizikleri tamamen yenilendi ve <strong>Chaos Vehicles</strong> eklentisi standart hale geldi. Bir aracı kodlarken, doğrudan arabanın kendisine değil, arabanın içindeki motor, şanzıman ve tekerlek fiziklerini hesaplayan <em>Vehicle Movement Component</em> (Araç Hareket Bileşeni) adlı sisteme komut göndeririz.</p>
+            
+            <p>Bu projede, standart bir Analog Joystick (PlayStation veya Xbox kolundaki çubukların aynısı) modülünü kullanarak, yatay ekseni direksiyon (Steering), dikey ekseni ise gaz/fren (Throttle/Brake) olarak kullanacağız.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Arduino Kodu</h2>
+            <p>Analog Joystick'in iki ekseni vardır: VRx ve VRy. Bunları A0 ve A1 pinlerine bağlayacağız. Veriyi saf 0-1023 olarak göndermek yerine, Unreal'ın araç fiziğinin kolay anlayacağı şekilde merkez noktayı 0 yapıp, <strong>-100 ile +100</strong> arasında bir değer üreteceğiz.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Joystick Verisini Formatla ve Gönder</span>
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Joystick serbestken 512 civarıdır. map() ile bunu 0'a ortalıyoruz.</span>
+  <span class="comment">// Sola çekince -100, sağa çekince +100 olacak.</span>
+  <span class="keyword">int</span> direksiyon = map(analogRead(A0), 0, 1023, -100, 100);
+  
+  <span class="comment">// Yukarı itince gaz (+100), aşağı çekince fren/geri (-100)</span>
+  <span class="keyword">int</span> gazFren = map(analogRead(A1), 0, 1023, -100, 100);
+
+  <span class="comment">// Ölü Bölge (Deadzone) Ayarı: Hassas sensör titremelerini engeller</span>
+  <span class="keyword">if</span>(direksiyon > -10 && direksiyon < 10) direksiyon = 0;
+  <span class="keyword">if</span>(gazFren > -10 && gazFren < 10) gazFren = 0;
+
+  <span class="comment">// ÇOKLU VERİ PAKETLEME: "Direksiyon,GazFren\n" formatı</span>
+  Serial.print(direksiyon);
+  Serial.print(",");
+  Serial.println(gazFren); <span class="comment">// Alt satıra in!</span>
+  
+  delay(20); <span class="comment">// 50Hz akış</span>
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Deadzone (Ölü Bölge) Neden Önemli?:</strong> Analog çubuklar parmağınızı çektiğinizde tam sıfıra dönmeyebilir (-3 veya +2 kalabilir). Bu da oyundaki arabanızın kendi kendine hafifçe sağa kaymasına sebep olur. Kodda yazdığımız <code>if</code> şartı bu titremeyi yok eder.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Öncelikle projenizde <strong>Edit -> Plugins</strong> sekmesinden <em>Chaos Vehicles Plugin</em>'in aktif olduğundan emin olun. Epic Games'in hazır sunduğu "Vehicle Template" (Spor Araba) üzerinden gitmek işleri çok hızlandırır.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Arabayı Dinlemeye Almak:</strong> Spor arabanızın Blueprint'ine girin. <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> ile gelen "Direksiyon,GazFren" verisini okuyun ve <span class="bp-array">Parse Into Array</span> (Virgül ile ayırıcı) düğümüyle parçalayın.</li>
+                
+                <li><strong>Direksiyonu Bağlamak (X Ekseni - Index 0):</strong>
+                    <ul>
+                        <li><span class="bp-array">Get (0)</span> ile ilk veriyi alın ve <span class="bp-pure">To Float</span> ile ondalıklı sayıya çevirin.</li>
+                        <li>Chaos fizik motoru direksiyon açısını -1.0 (Tam Sol) ile 1.0 (Tam Sağ) arasında kabul eder.</li>
+                        <li>Gelen veriyi (-100/100) dönüştürmek için <span class="bp-pure">Map Range Clamped</span> kullanın (Out: -1.0 / 1.0).</li>
+                        <li>Sol menüden (Components) <strong>Vehicle Movement Component</strong>'i sahneye sürükleyin. Ondan bir kablo çekin ve <span class="bp-func">Set Steering Input</span> düğümünü bulun. Oranladığınız sayıyı buraya bağlayın.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Gaz ve Freni Bağlamak (Y Ekseni - Index 1):</strong>
+                    <ul>
+                        <li><span class="bp-array">Get (1)</span> ile ikinci veriyi alın.</li>
+                        <li>Yukarı ittiğinizde (Örn: 0 ile 100 arası) <strong>Vehicle Movement Component</strong>'den <span class="bp-func">Set Throttle Input</span> düğümüne 0.0 - 1.0 arası gönderin.</li>
+                        <li>Aşağı çektiğinizde (Örn: -100 ile 0 arası) sayının eksisini kaldırıp (Absolute Value) yine 0.0 - 1.0 arasında <span class="bp-func">Set Brake Input</span> düğümüne gönderin.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Önemli:</strong> Normal objeleri hareket ettirirken <code>Add Actor Local Offset</code> kullanırız. Ancak araçlarda motor devri, tekerlek sürtünmesi ve süspansiyon hesaplandığı için mutlaka <code>Chaos Vehicle Movement Component</code> içindeki <strong>Input</strong> (Girdi) fonksiyonlarını kullanmalısınız!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Handbrake (El Freni) Ekleme</h2>
+            <p>Laboratuvar testini yaptıktan sonra gençlere yeni bir görev verin: Analog Joystick modülünün üzerinde aslında tıklanabilen bir <strong>SW (Switch/Buton)</strong> bulunur.</p>
+            <p>Proje 1'de öğrendikleri buton okuma mantığını kullanarak, Joystick'in üzerine basıldığında Arduino'dan 3. bir veri ("Direksiyon,Gaz,Buton") göndermelerini sağlayın. Bu buton verisi 1 olduğunda Unreal Engine'deki <span class="bp-func">Set Handbrake Input</span> (El Freni) düğümünü aktifleştirerek araca fiziksel drift yaptırmalarını isteyin!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

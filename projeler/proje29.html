@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 29: ESP-NOW ile Çoklu Oyuncu - Yerel Ağ Kumandaları</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Siber) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-array { background: linear-gradient(180deg, #8e44ad 0%, #5b2c6f 100%); border-color: #9b59b6; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 29: ESP-NOW</h1>
+                <p>Modemsiz (Router-less) Çoklu Oyuncu Fiziksel Kumanda Mimarisi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- PROJE HAKKINDA -->
+        <div class="section-card">
+            <h2>🎯 Senaryo: Odanızdaki E-Spor Turnuvası</h2>
+            <p>Eğer laboratuvardaki internet bağlantısı yavaşsa veya modem kısıtlamaları (Port sınırları) varsa, Wi-Fi üzerinden UDP kullanmak gecikmelere (Ping) yol açabilir. Dövüş oyunları (Mortal Kombat, Tekken) veya yarış oyunlarında (Mario Kart) milisaniyeler bile çok önemlidir.</p>
+            <p>ESP-NOW ile her oyuncunun elindeki kumanda (ESP32 Verici), oyunu oynatan bilgisayara takılı olan tek bir ESP32'ye (Alıcı USB Dongle) cihazların <strong>MAC Adresleri</strong> üzerinden doğrudan bağlanır. Tıpkı PlayStation veya Xbox'ın kablosuz kontrolcülerinde olduğu gibi kesintisiz, internetsiz ve yüksek hızlı bir çoklu oyuncu (Local Multiplayer) deneyimi yaratacağız.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <!-- 1. DONANIM (ESP32) -->
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Verici ve Alıcı Mimarisi</h2>
+            <p>Bu projede <strong>iki farklı koda</strong> ihtiyacımız var. Biri oyuncuların elindeki kumandalara, diğeri bilgisayardaki alıcıya yüklenecektir. ESP-NOW'da veri gönderimi <code>struct</code> (Veri Yapısı) paketleriyle yapılır.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// 1. VERİCİ (KUMANDA) KODU - Oyuncu 1'in elindeki ESP32</span>
+#include &lt;esp_now.h&gt;
+#include &lt;WiFi.h&gt;
+
+<span class="comment">// Bilgisayara takılı olan ALICI ESP32'nin MAC Adresini buraya yazın</span>
+<span class="keyword">uint8_t</span> aliciMAC[] = {0x24, 0x6F, 0x28, 0xAE, 0x77, 0x90};
+
+<span class="comment">// Veri Paketimizin Yapısı</span>
+<span class="keyword">typedef struct</span> struct_message {
+  <span class="keyword">int</span> playerID;
+  <span class="keyword">int</span> buttonState;
+} struct_message;
+
+struct_message gidenVeri;
+esp_now_peer_info_t peerInfo;
+<span class="keyword">const int</span> atesButon = 4;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  pinMode(atesButon, INPUT_PULLUP);
+  
+  WiFi.mode(WIFI_STA); <span class="comment">// Wi-Fi İstasyon Modu</span>
+  
+  <span class="keyword">if</span> (esp_now_init() != ESP_OK) {
+    Serial.println(<span class="string">"ESP-NOW Baslatilamadi!"</span>);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="comment">// Alıcıyı kaydet (Pairing)</span>
+  memcpy(peerInfo.peer_addr, aliciMAC, 6);
+  peerInfo.channel = 0;  
+  peerInfo.encrypt = false;
+  esp_now_add_peer(&peerInfo);
+}
+
+<span class="keyword">void</span> loop() {
+  gidenVeri.playerID = 1; <span class="comment">// 2. Kumanda için burayı 2 yapın</span>
+  gidenVeri.buttonState = !digitalRead(atesButon); <span class="comment">// Basılıysa 1, değilse 0</span>
+  
+  <span class="comment">// Veriyi Gönder</span>
+  esp_now_send(aliciMAC, (<span class="keyword">uint8_t</span> *) &gidenVeri, <span class="keyword">sizeof</span>(gidenVeri));
+  delay(20); <span class="comment">// 50 Hz Hız (Çok hızlı tepki süresi)</span>
+}</pre>
+            </div>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// 2. ALICI (DONGLE) KODU - PC'ye USB ile bağlı olan ESP32</span>
+#include &lt;esp_now.h&gt;
+#include &lt;WiFi.h&gt;
+
+<span class="keyword">typedef struct</span> struct_message {
+  <span class="keyword">int</span> playerID;
+  <span class="keyword">int</span> buttonState;
+} struct_message;
+
+struct_message gelenVeri;
+
+<span class="comment">// Veri geldiğinde tetiklenecek fonksiyon (Callback)</span>
+<span class="keyword">void</span> OnDataRecv(<span class="keyword">const uint8_t</span> * mac, <span class="keyword">const uint8_t</span> *incomingData, <span class="keyword">int</span> len) {
+  memcpy(&gelenVeri, incomingData, <span class="keyword">sizeof</span>(gelenVeri));
+  
+  <span class="comment">// Gelen veriyi Serial Port üzerinden Unreal Engine'e yazdır</span>
+  <span class="comment">// Format: PlayerID,ButtonState (Örn: 1,1 veya 2,0)</span>
+  Serial.print(gelenVeri.playerID);
+  Serial.print(<span class="string">","</span>);
+  Serial.println(gelenVeri.buttonState);
+}
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600); <span class="comment">// Unreal Engine SerialCOM hızı</span>
+  WiFi.mode(WIFI_STA);
+  esp_now_init();
+  <span class="comment">// Dinleyiciyi başlat</span>
+  esp_now_register_recv_cb(OnDataRecv); 
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Alıcı ESP32'nin loop döngüsü boş kalır, veri geldikçe Callback çalışır.</span>
+}</pre>
+            </div>
+        </div>
+
+        <!-- 2. BLUEPRINT (UNREAL) -->
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Karakter Ayrıştırması</h2>
+            <p>Unreal Engine tarafında SerialCOM eklentisi (Seviye 1'deki altyapımız) USB'ye bağlı olan Alıcı ESP32'yi dinleyecektir. Gelen verinin başındaki <code>PlayerID</code> numarasına göre doğru karakteri hareket ettirmemiz gerekir.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Sinyali Dinlemek:</strong> <span class="bp-event">Event Tick</span> -> <span class="bp-func">Read Line</span> ile metni okuyup <span class="bp-array">Parse Into Array</span> (Ayırıcı: Virgül) ile bölün.</li>
+                <li><strong>Hangi Oyuncu?:</strong> <span class="bp-array">Get (0)</span> düğümünden çıkan sonucu (Oyuncu kimliği) bir <span class="bp-flow">Switch on String</span> düğümüne bağlayın. Pinleri <code>1</code> ve <code>2</code> olarak oluşturun.</li>
+                <li><strong>Komutu Aktarmak (Player 1):</strong> Switch'in <code>1</code> çıkışından kablo çekin. Sahnedeki <strong>Player 1 Pawn</strong> referansınıza (veya Cast işlemiyle) ulaşıp, <span class="bp-array">Get (1)</span> pininden gelen "Buton" verisini (Eşittir == 1 ise True) Player 1'in zıplama veya ateş etme fonksiyonuna bağlayın.</li>
+                <li><strong>Komutu Aktarmak (Player 2):</strong> Switch'in <code>2</code> çıkışından kablo çekin ve aynı işlemi sahnede bulunan <strong>Player 2 Pawn</strong> karakteri için uygulayın.</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Çoklu Oyuncu Çakışması (Ghosting):</strong> Aynı anda yüzlerce milisaniyelik veri geldiği için Blueprint'te <code>DoOnce</code> veya <code>Cooldown</code> (Gecikme) sistemlerini karakterlerin kendi içlerine (Character Blueprint) yerleştirmeniz, oyunun akıcılığını artıracaktır.
+            </div>
+        </div>
+
+        <!-- 3. ATÖLYE UYGULAMASI -->
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: 3D Yazıcı ile Konsol Kumandası</h2>
+            <p>ARGE ekibinizin donanım geliştirme vizyonunu tam olarak sergileyeceği görev budur.</p>
+            <p>Ekipten Fusion 360 veya Blender kullanarak, içine bir ESP32 modülü, şarj edilebilir bir batarya (Lipo), bir joystick ve 2 adet arcade butonu sığabilecek ergonomik bir <strong>Oyun Kumandası (Gamepad)</strong> tasarlamalarını isteyin. Tasarımlar 3D yazıcıdan çıktıktan sonra komponentleri lehimleyip kasaya oturtsunlar. Unreal Engine'de basit bir bölünmüş ekran (Split-Screen) araba yarışı hazırlayın ve tamamen kendi ürettikleri kablosuz kumandalarla birbirlerine karşı yarışmalarını sağlayın. Maker ruhunun zirvesi tam olarak burasıdır!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

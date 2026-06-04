@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 3: Zamanın Kontrolü - Unreal Engine Time Dilation</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #12151f 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--ue-blue);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--ue-blue); color: #fff; border-color: var(--ue-blue); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--ue-blue); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--ue-blue);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--ue-blue); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 3: Zamanın Kontrolü</h1>
+                <p>Potansiyometre ile Unreal'da Global Time Dilation (Zamanı Bükme)</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Fiziksel Matrix Etkisi</h2>
+            <p>Oyun motorlarındaki fiziksel simülasyonların (düşen nesneler, patlamalar, yürüyen karakterler) hızı tek bir değişkene bağlıdır. Unreal Engine'de buna <strong>Global Time Dilation</strong> denir. Normal hızı 1.0'dır. Eğer bunu 0.1 yaparsanız oyun ağır çekime girer, 2.0 yaparsanız her şey iki kat hızlı hareket eder.</p>
+            
+            <p>Bu projede masamıza basit bir potansiyometre (ayarlı direnç) kuracağız. Oyuncular bu düğmeyi çevirerek anlık olarak oyunun zaman akışını değiştirecekler.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Arduino Kodu</h2>
+            <p>Potansiyometrenin sağ ve sol bacaklarını 5V ve GND pinlerine, orta bacağını ise <strong>A0 (Analog 0)</strong> pinine bağlıyoruz. Buradan 0 ile 1023 arasında bir değer okuyacağız.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Potansiyometre Verisini Gönder</span>
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600); 
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// A0 pininden değeri oku (0 - 1023 arası)</span>
+  <span class="keyword">int</span> potDegeri = analogRead(A0);
+  
+  <span class="comment">// Unreal Engine'de zamanı tamamen durdurmamak için ufak bir hile yapıyoruz.</span>
+  <span class="comment">// 0 gelirse oyun donar, bu yüzden değerin altına sınır koyuyoruz (Örn: en az 10 gelsin).</span>
+  <span class="keyword">if</span>(potDegeri < 10) potDegeri = 10;
+  
+  <span class="comment">// Okunan veriyi Seri Porta yaz ve Alt Satıra in (println ZORUNLU)</span>
+  Serial.println(potDegeri); 
+  
+  <span class="comment">// Titremeleri (Jitter) önlemek için ufak bir bekleme</span>
+  delay(20); 
+}</pre>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Gelen bu 0-1023 arası veriyi doğrudan Time Dilation'a bağlarsak oyun motoru çöker (zaman 1000 kat hızlanamaz). Bu yüzden gelen veriyi Unreal'da <strong>Map Range Clamped</strong> düğümüyle daraltacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Veriyi Okumak:</strong> <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> düğümüyle Arduino'dan gelen metni alıyoruz. Sarı (String) çıkışı <strong>To Float</strong> düğümüyle ondalıklı sayıya çevirin.</li>
+                
+                <li><strong>Değerleri Dönüştürmek (Mapping):</strong> Çıkan bu Float kablosunu <span class="bp-pure">Map Range Clamped</span> düğümüne bağlayın. Bu muazzam düğüm iki aralığı birbirine oranlar.
+                    <ul>
+                        <li><strong>In Range A:</strong> 10 (Minimum potansiyometre değeri)</li>
+                        <li><strong>In Range B:</strong> 1023 (Maksimum potansiyometre değeri)</li>
+                        <li><strong>Out Range A:</strong> 0.1 (En ağır çekim, normalin %10'u)</li>
+                        <li><strong>Out Range B:</strong> 2.0 (Oyunun 2 kat hızlı hali)</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Zamanı Bükmek:</strong> Map Range Clamped düğümünün çıkışını <span class="bp-func">Set Global Time Dilation</span> düğümünün <em>Time Dilation</em> pinine bağlayın. Son olarak Tick event'inizin beyaz (Exec) kablosunu bu düğüme takın.</li>
+            </ol>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Neden "Clamped" (Kelepçeli) Sürüm?:</strong> "Map Range Unclamped" kullanırsanız, sensörde oluşabilecek anlık bir parazit değeri sınırların dışına taşırır. Clamped sürümü, değer 1023'ü aşsa bile çıkışın 2.0'ı geçmesini fiziksel olarak engeller. Bu bir güvenlik (optimizasyon) önlemidir.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı</h2>
+            <p>Mekaniği test etmek için sahneye dönen objeler, zıplayan toplar veya havada uçuşan partikül efektleri (Niagara) ekleyin. Play'e basın ve masadaki potansiyometreyi yavaşça sola çevirin.</p>
+            
+            <div class="alert-box alert-warning">
+                <strong>Geliştirme Görevi:</strong> Zaman yavaşladığında seslerin (müziklerin) de perde değiştirmesi (Pitch kalınlaşması) gerekir. Öğrencilerinizden <strong>Set Global Pitch Modulation</strong> düğümünü araştırarak aynı potansiyometre verisiyle oyunun arka plan müziğini de ağır çekim hissiyatına uydurmalarını isteyin!
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

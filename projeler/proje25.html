@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 25: Akıllı Laboratuvar - Multi-Node IoT Ağı</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Siber) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-array { background: linear-gradient(180deg, #8e44ad 0%, #5b2c6f 100%); border-color: #9b59b6; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 25: Akıllı Laboratuvar</h1>
+                <p>Çoklu Düğüm (Multi-Node) IoT Ağı ve Dijital İkiz (Digital Twin) Yönetimi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Veri Merkezini Kurmak (Dijital İkiz)</h2>
+            <p>Endüstriyel yazılımların ve modern oyunların ortak noktası "Büyük Veri" (Big Data) yönetimidir. Şu ana kadar Unreal Engine'e tek bir kaynaktan veri gönderdik. Peki ya laboratuvarımızdaki <strong>5 farklı masada 5 farklı ESP32</strong> aynı anda çalışıp ana sunucuya (Unreal Engine) veri gönderirse ne olur?</p>
+            <p>Bu projede, her masadaki ESP32 kendisine özel bir kimlik (ID) ile ağa veri fırlatacak. Unreal Engine bu verileri havada yakalayacak, hangi masadan ve hangi sensörden geldiğini ayrıştıracak ve laboratuvarın 3D kopyasındaki (Dijital İkiz) ilgili göstergeleri güncelleyecektir.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Düğüm (Node) Kimliklendirmesi</h2>
+            <p>Bu kod, laboratuvardaki farklı masalara dağıtacağımız ESP32'lerin şablon kodudur. Ağdaki karışıklığı önlemek için veriyi <code>"MASA_NO,SENSOR_TIPI,DEGER"</code> formatında paketleyip göndereceğiz.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Düğüm (Node) Veri Gönderimi</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="comment">// Ağ Ayarları</span>
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>; <span class="comment">// Ana Sunucu Bilgisayarın IP'si</span>
+<span class="keyword">const int</span> unrealPort = 8888; 
+
+WiFiUDP udp;
+
+<span class="comment">// --- BU KISMI HER MASADA DEĞİŞTİRİN ---</span>
+String MASA_ID = <span class="string">"MASA_1"</span>; 
+<span class="comment">// --------------------------------------</span>
+
+<span class="keyword">const int</span> isiSensorPin = A0; <span class="comment">// Örnek bir analog sensör</span>
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Sensörden değeri oku</span>
+  <span class="keyword">int</span> deger = analogRead(isiSensorPin);
+
+  <span class="comment">// Veri Paketini Oluştur (Örn: "MASA_1,ISI,450")</span>
+  String veriPaketi = MASA_ID + <span class="string">",ISI,"</span> + String(deger);
+
+  <span class="comment">// UDP ile fırlat</span>
+  udp.beginPacket(unrealIP, unrealPort);
+  udp.print(veriPaketi);
+  udp.endPacket();
+
+  <span class="comment">// Ağı yormamak için 1 saniye bekle (IoT ağlarında verimlilik esastır)</span>
+  delay(1000); 
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Multi-Node (Çoklu Düğüm) Mantığı:</strong> UDP protokolü aynı anda birden fazla cihazın aynı porta veri fırlatmasına izin verir. Ana bilgisayar IP adresiniz değişmediği sürece atölyeye 50 adet ESP32 koysanız bile hepsi Unreal'a sorunsuz ulaşır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Merkezi Yönetim Sistemi</h2>
+            <p>Unreal Engine tarafında artık sıradan bir karakter kontrolcüsü değil, devasa bir <strong>Veri Dağıtım Merkezi (Dispatcher)</strong> kuruyoruz.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar (Gelişmiş Ayrıştırma):</h3>
+            <ol>
+                <li><strong>Gelen Sinyali Yakalamak:</strong> <span class="bp-event">Event On UDP Message Received</span> ile gelen Byte dizisini <span class="bp-pure">Bytes to String</span> ile metne dönüştürün.</li>
+                
+                <li><strong>Parçalama (Parsing):</strong> Metni <span class="bp-array">Parse Into Array</span> düğümüne sokun. Ayırıcı (Delimiter) olarak virgül <code>,</code> kullanın. Bu bize 3 elemanlı bir liste (Array) verecektir.</li>
+                
+                <li><strong>Ana Dağıtıcı (Hangi Masa?):</strong> 
+                    <ul>
+                        <li><span class="bp-array">Get (0)</span> düğümünü çağırıp ilk veriyi alın.</li>
+                        <li>Bunu bir <span class="bp-flow">Switch on String</span> düğümüne bağlayın.</li>
+                        <li>Pin isimlerini laboratuvardaki masalara göre ayarlayın: <code>MASA_1</code>, <code>MASA_2</code>, <code>MASA_3</code>.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Alt Dağıtıcı (Hangi Sensör?):</strong>
+                    <ul>
+                        <li>Örneğin <code>MASA_1</code> pininden çıkan kabloyu <strong>ikinci bir</strong> <span class="bp-flow">Switch on String</span> düğümüne bağlayın.</li>
+                        <li>Bu ikinci Switch'in String girişine <span class="bp-array">Get (1)</span> (Yani Sensör Tipi) düğümünü bağlayın.</li>
+                        <li>Pinleri sensör türlerine göre ayarlayın: <code>ISI</code>, <code>BUTON</code>, <code>RFID</code>.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Veriyi İşleme:</strong>
+                    <ul>
+                        <li>Eğer Masa 1'den ISI geldiyse, <span class="bp-array">Get (2)</span> düğümünü (Sensör değeri) alıp <span class="bp-pure">To Float</span> yapın.</li>
+                        <li>Bu değeri kullanarak sahnedeki "Masa 1 Hologramı"nın rengini (Set Vector Parameter Value) kırmızı veya mavi yaparak sıcaklığı görselleştirin!</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Cast İşlemleri:</strong> Gerçek bir projede yüzlerce kablo çekmek yerine, <code>MASA_1</code> sinyali geldiğinde sahnede bulunan <em>BP_Masa1</em> aktörüne <span class="bp-func">Cast To</span> yaparak doğrudan o aktörün içindeki bir fonksiyonu (Örn: SicaklikGuncelle) tetiklemek çok daha profesyonel bir (OOP - Nesne Yönelimli Programlama) yaklaşımıdır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: Kumanda Merkezi (Command Center)</h2>
+            <p>ARGE ekibini 3 veya 4 küçük gruba ayırın. Her gruba bir ESP32 ve farklı türde bir sensör (Buton, LDR, Isı vb.) verin. Kendi masa ID'lerini ("Kırmızı_Takim", "Mavi_Takim" gibi) belirlesinler.</p>
+            <p>Unreal Engine projesini tam ekrana alın (F11). Sahnede her takım için bir 3D platform olsun. Takımlar kendi masalarındaki sensörlerle oynadıkça, ana ekrandaki platformlarının renk değiştirmesini, yükselmesini veya ateş püskürtmesini canlı olarak izlesinler. Bu, endüstriyel SCADA (Veri Tabanlı Kontrol ve Gözetleme) sistemlerinin oyunlaştırılarak öğretilmesinin zirvesidir!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

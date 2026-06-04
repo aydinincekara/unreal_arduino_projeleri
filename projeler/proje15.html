@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 15: Oksijen ve Hayatta Kalma - Unreal Engine & Su Sensörü</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level3: #2ecc71; /* Seviye 3 Yeşili */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #0b1f15 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level3);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level3); color: #000; border-color: var(--level3); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level3); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level3);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level3); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+        .alert-danger { border-color: var(--danger-color); }
+        .alert-danger strong { color: var(--danger-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+        .bp-var { background: linear-gradient(180deg, #c0392b 0%, #922b21 100%); border-color: #e74c3c; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 15: Oksijen ve Hayatta Kalma</h1>
+                <p>Fiziksel Su Seviye Sensörü ile UMG Oksijen Barı Yönetimi</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Boğulma Mekaniği</h2>
+            <p>Oyun dünyasında karakterin suyun altında ne kadar kalabileceğini belirleyen bir "Oksijen Barı" (Oxygen/Breath Bar) genellikle bir zamanlayıcıyla çalışır. Biz bu zamanlayıcıyı masamızdaki fiziksel sıvı miktarına bağlıyoruz. </p>
+            <p>Sensör suya çok az temas ettiğinde oksijen yavaş yavaş azalacak, sensör tamamen suya daldırıldığında ise oksijen hızla tükenecek ve sonunda karakter boğularak (Hasar alarak) ölecektir. Suden çıkarıldığında ise oksijen barı tekrar dolmaya başlayacaktır.</p>
+            <br>
+            
+
+[Image of Arduino water level sensor wiring diagram]
+
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Analog Su Seviye Sensörü</h2>
+            <p>Su sensörleri üzerinde paralel bakır şeritler barındırır. Bu şeritler suyla temas ettiğinde direnç değişir. Sensörün <code>S</code> (Sinyal) pinini Arduino'nun <strong>A0</strong> analog pinine, <code>+</code> pinini 5V'a, <code>-</code> pinini ise GND'ye bağlayın.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Su Seviyesini Oku ve Gönder</span>
+
+<span class="keyword">const int</span> suSensoriPin = A0;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Sensör değerini oku (Kuruyken 0, tamamen suyun içindeyken ~600-700 arası değer verir)</span>
+  <span class="keyword">int</span> suSeviyesi = analogRead(suSensoriPin);
+  
+  <span class="comment">// Ufak parazitleri yoksaymak için eşik (Threshold) belirliyoruz</span>
+  <span class="keyword">if</span>(suSeviyesi < 10) {
+    suSeviyesi = 0;
+  }
+  
+  <span class="comment">// Veriyi Unreal Engine'e gönder</span>
+  Serial.println(suSeviyesi);
+  
+  delay(50); <span class="comment">// Veri akışını dengele (20 FPS)</span>
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-danger">
+                <strong>⚠️ Laboratuvar Güvenliği (Elektroliz Uyarısı):</strong> Su sensörleri sıvı içinde elektrik akımı geçirdiği için zamanla bakır kısımlarında "korozyon" ve "elektroliz" (yeşerme) meydana gelir. Sensörü suyun içinde saatlerce bırakmayın. Test işlemi bittikten sonra bir peçete ile kurulamanız sensörün ömrünü uzatacaktır.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Bu mekaniği kurmak için iki şeye ihtiyacımız var: Birincisi karakterin canını tutan değişkenler, ikincisi ise bunu ekranda gösterecek bir UMG Progress Bar (İlerleme Çubuğu).</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Değişkenleri Hazırlama:</strong> Karakter Blueprint'inize girip <code>MaxOxygen</code> (Değer: 100.0) ve <code>CurrentOxygen</code> (Değer: 100.0) adında iki adet <span class="bp-var">Float</span> değişken oluşturun.</li>
+                
+                <li><strong>Veri ve Tüketim Hızı:</strong> <span class="bp-event">Event Tick</span> üzerinden <span class="bp-func">Read Line</span> ile sensörden gelen su verisini okuyup Float'a çevirin.
+                    <ul>
+                        <li>Gelen bu veriyi <span class="bp-pure">Map Range Clamped</span> düğümüne bağlayın.</li>
+                        <li><strong>In Range:</strong> 0 - 600 (Sensör sınırları)</li>
+                        <li><strong>Out Range:</strong> -5.0 (Suyun dışındayken saniyede 5 birim oksijen DOLSUN) ve 10.0 (Sensör tamamen sudayken saniyede 10 birim oksijen AZALSIN).</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Matematik İşlemi:</strong> 
+                    <ul>
+                        <li><code>CurrentOxygen</code> değişkenini alıp, az önce bulduğunuz hız değeriyle <span class="bp-pure">Subtract (-)</span> (Çıkar) düğümüne sokun.</li>
+                        <li>Sonucu <span class="bp-pure">Clamp (Float)</span> düğümünden geçirin (Min: 0.0, Max: 100.0). Böylece oksijen 0'ın altına veya 100'ün üstüne çıkamaz.</li>
+                        <li>Çıkan nihai sonucu tekrar <span class="bp-func">Set CurrentOxygen</span> düğümüyle kaydedin.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Boğulma (Hasar) Kontrolü:</strong> Oksijen hesaplandıktan sonra bir <span class="bp-flow">Branch</span> ile <code>CurrentOxygen <= 0</code> mı diye kontrol edin. Eğer True ise, karaktere saniyede bir miktar hasar vermek için <span class="bp-func">Apply Damage</span> düğümünü kullanın!</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>💡 Delta Time (Optimizasyon):</strong> <code>Event Tick</code> bilgisayarınızın hızına (FPS) göre çalışır. Güçlü bir bilgisayarda oksijen çok hızlı tükenirken, yavaş bir bilgisayarda yavaş tükenir. Bunu engellemek için, çıkarma işlemi yapmadan önce eksilecek miktarı <strong>Event Tick'in Delta Seconds</strong> piniyle (Çarpma işlemi kullanarak) çarpmalısınız. Bu sayede süre FPS'ten bağımsız, gerçek saniyeye döner!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: UI Oksijen Barı</h2>
+            <p>Sistemin çalıştığını görmek için ekrana bir UI çizelim:</p>
+            <ol>
+                <li>Unreal'da sağ tıklayıp <strong>User Interface -> Widget Blueprint</strong> oluşturun (Adı: <code>UI_Oxygen</code>).</li>
+                <li>İçine sol taraftaki paletten bir <strong>Progress Bar</strong> (İlerleme Çubuğu) sürükleyin. Rengini mavi yapın.</li>
+                <li>Progress Bar'ın sağ tarafındaki <em>Percent</em> ayarının yanındaki <strong>Bind</strong> butonuna tıklayıp <em>Create Binding</em> deyin.</li>
+                <li>Açılan kod ekranında, karakterinize Cast yapıp (Örn: <code>Cast To ThirdPersonCharacter</code>) onun <code>CurrentOxygen</code> değerini çekin. Bu değeri 100'e bölüp (Çünkü progress bar 0.0 ile 1.0 arası çalışır) çıkışa bağlayın.</li>
+            </ol>
+            <p>Oyunu başlattığınızda, sensörü suya soktuğunuz anda ekrandaki mavi barın yavaşça eridiğini kendi gözlerinizle göreceksiniz!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

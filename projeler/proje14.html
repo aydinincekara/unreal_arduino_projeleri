@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 14: Çift Ekran Deneyimi - UMG ve OLED Senkronizasyonu</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --ue-hover: #0098ff;
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level3: #2ecc71; /* Seviye 3 Yeşili */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #0b1f15 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level3);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level3); color: #000; border-color: var(--level3); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level3); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level3);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level3); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+        .alert-danger { border-color: var(--danger-color); }
+        .alert-danger strong { color: var(--danger-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            border: 1px solid #5a6b7c;
+            margin: 0 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 14: Çift Ekran Deneyimi</h1>
+                <p>Unreal Engine Arayüz (UMG) ve Arduino OLED Ekran Senkronizasyonu</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Fiziksel Gösterge Paneli (Dashboard)</h2>
+            <p>Oyunlardaki HUD (Head-Up Display) ekranları oyuncuya can, zırh veya mermi gibi hayati bilgileri verir. Unreal Engine'de bu arayüzler UMG (Unreal Motion Graphics) ile tasarlanır. Bu projede, oyun içindeki mermi sayacımızı (Ammo) Arduino'ya gönderip, gerçek masamızdaki 0.96 inçlik bir OLED ekranda canlı olarak göstereceğiz.</p>
+            <p>Bu mantık profesyonel yarış simülatörlerindeki fiziksel hız göstergelerinin (Speedometer) ve uçuş simülatörlerindeki altimetrelerin arkasında yatan teknolojinin temelidir.</p>
+            
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: 0.96" OLED Ekran (I2C)</h2>
+            <p>OLED ekranımız <strong>I2C</strong> protokolünü kullandığı için çok az kabloya ihtiyaç duyar. VCC->5V, GND->GND, <strong>SDA->A4</strong>, <strong>SCL->A5</strong> pinlerine bağlanır. Arduino IDE üzerinden <code>Adafruit SSD1306</code> ve <code>Adafruit GFX</code> kütüphanelerini kurmanız zorunludur.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ARDUINO KODU: Unreal'dan Gelen Metni OLED'e Yazdırma</span>
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_GFX.h&gt;
+#include &lt;Adafruit_SSD1306.h&gt;
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+<span class="comment">// I2C adresi genellikle 0x3C'dir.</span>
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(9600);
+  
+  <span class="comment">// Ekranı başlat (Başarısız olursa döngüye gir)</span>
+  <span class="keyword">if</span>(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    <span class="keyword">for</span>(;;);
+  }
+  
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(2);
+  display.setCursor(10, 20);
+  display.println(<span class="string">"SISTEM"</span>);
+  display.println(<span class="string">"HAZIR"</span>);
+  display.display();
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// Unreal Engine'den yeni bir veri geldi mi?</span>
+  <span class="keyword">if</span> (Serial.available() > 0) {
+    
+    <span class="comment">// readStringUntil('\n') komutu, Unreal'ın gönderdiği satırı sonuna kadar okur.</span>
+    String gelenMetin = Serial.readStringUntil('\n');
+    
+    <span class="comment">// Ekranı temizle ve yeni metni yaz</span>
+    display.clearDisplay();
+    display.setCursor(0, 25); <span class="comment">// Yazıyı ortala</span>
+    display.print(gelenMetin);
+    
+    <span class="comment">// Ekrana bas!</span>
+    display.display();
+  }
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 I2C Adresi Hatası:</strong> Eğer ekranınız hiç açılmıyorsa I2C adresi muhtemelen farklıdır. <code>0x3C</code> yerine <code>0x3D</code> yazarak tekrar test edebilirsiniz.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Oyunumuzda <strong>"CurrentAmmo"</strong> (Mevcut Mermi) adında bir Integer (Tam sayı) değişkenimiz olsun. Karakter her ateş ettiğinde bu mermi azalacak ve yeni sayı OLED ekrana gönderilecektir.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar (Optimizasyon Şart!):</h3>
+            
+            <div class="alert-box alert-danger">
+                <strong>⚠️ KRİTİK UYARI (Asla Tick Kullanmayın!):</strong> I2C ekranlar çok yavaş güncellenir (Yaklaşık 15-20 FPS). Eğer mermi sayısını <code>Event Tick</code> ile saniyede 60 defa Arduino'ya yollarsanız, ekran donar ve Arduino kilitlenir. Veriyi <strong>sadece mermi sayısı değiştiğinde</strong> göndermeliyiz (Event-Driven Programlama).
+            </div>
+
+            <ol>
+                <li><strong>Ateş Etme Olayı:</strong> Karakterinizin ateş etme tuşuna (<span class="bp-event">InputAction Fire</span>) basıldığında, CurrentAmmo değişkenini 1 azaltın.</li>
+                
+                <li><strong>Metni Hazırlamak:</strong> Yeni mermi sayısını doğrudan yollamak yerine onu güzel bir metin haline getirelim. Boş bir yere sağ tıklayıp <span class="bp-pure">Append</span> (Metinleri Birleştir) düğümünü çağırın.
+                    <ul>
+                        <li><strong>A Pinine:</strong> <code>MERMI: </code> (Sonuna bir boşluk bırakın) yazın.</li>
+                        <li><strong>B Pinine:</strong> <em>CurrentAmmo</em> değişkenini sürükleyip bırakın (Otomatik olarak Integer to String dönüşümü yapacaktır).</li>
+                        <li><strong>C Pinine (ÖNEMLİ):</strong> <em>Add Pin</em> diyerek 3. bir giriş açın. C kutusuna farenizle tıklayıp klavyeden <strong>Shift + Enter</strong> tuşuna basarak gizli bir "Alt Satıra İnme (\n)" karakteri ekleyin. Arduino'daki <code>readStringUntil('\n')</code> komutunun tetiklenmesi için bu ZORUNLUDUR!</li>
+                    </ul>
+                </li>
+                
+                <li><strong>OLED'e Göndermek:</strong> Append düğümünün çıkışını alın ve mermi azaldıktan hemen sonra çalışan <span class="bp-func">Write String</span> düğümünün String girişine bağlayın.</li>
+            </ol>
+            
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: UI Senkronizasyonu</h2>
+            <p>15-30 yaş grubundaki ARGE ekibinizin dikkatini çekecek en güzel projelerden biri budur. Bu sistemi özellikle yarış simülatörü (fiziksel vites ve hız göstergesi) veya FPS oyunlarında (fiziksel şarjör sayacı) kullandıklarında muazzam bir prototipleme becerisi kazanacaklardır.</p>
+            
+            <p><strong>Geliştirme Görevi (Hata Durumu):</strong> Eğer mermi 0'ın altına düşerse veya silah şarjör değiştiriyorsa (Reload), ekrana "RELOADING..." şeklinde yanıp sönen bir uyarı yazdırmak için Arduino kodunda ufak bir <code>if</code> kontrolü yazmalarını isteyin!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

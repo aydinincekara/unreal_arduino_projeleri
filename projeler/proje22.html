@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 22: Sihirli Değnek - ESP32 ile Kablosuz VR Kılıcı</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level4: #9b59b6; /* Seviye 4 Moru (IoT/Siber) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a0b2e 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level4);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level4); color: #fff; border-color: var(--level4); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level4); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level4);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level4); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-array { background: linear-gradient(180deg, #8e44ad 0%, #5b2c6f 100%); border-color: #9b59b6; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 22: Sihirli Değnek</h1>
+                <p>ESP32 ve MPU6050 İle Kablosuz VR Kontrolcüsü Geliştirme</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Odanız Artık Bir Savaş Alanı</h2>
+            <p>Meta Quest (Oculus) veya HTC Vive gibi VR sistemlerinin kontrolcüleri, içlerindeki yüksek hassasiyetli jiroskop verilerini bilgisayara kablosuz olarak gönderirler. Biz de kendi R&D (ARGE) atölyemizde tamamen kendi kodladığımız ve 3D yazıcıdan çıkardığımız bir kılıç kabzasıyla aynı sistemi inşa ediyoruz.</p>
+            <p>ESP32, üzerine bağlanan MPU6050 sensöründen X ve Y eksenindeki eğim (Pitch ve Roll) verilerini okuyacak ve bunları <code>X,Y</code> formatında, saniyede 50 defa UDP paketi olarak Unreal Engine'e fırlatacak.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Wi-Fi İvmeölçer Kodlaması</h2>
+            <p>MPU6050 modülü I2C üzerinden haberleşir. ESP32 üzerinde I2C pinleri genellikle <strong>SDA -> GPIO 21</strong> ve <strong>SCL -> GPIO 22</strong>'dir. Modülün VCC pinini ESP32'nin 3.3V pinine bağlamayı unutmayın (5V kullanmak ESP32'ye zarar verebilir).</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: MPU6050 Verilerini UDP ile Kablosuz Gönderme</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_MPU6050.h&gt;
+#include &lt;Adafruit_Sensor.h&gt;
+
+<span class="comment">// Ağ Ayarları</span>
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>; 
+<span class="keyword">const int</span> unrealPort = 8888; 
+
+WiFiUDP udp;
+Adafruit_MPU6050 mpu;
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+
+  <span class="comment">// MPU6050 Başlatma</span>
+  <span class="keyword">if</span> (!mpu.begin()) {
+    Serial.println(<span class="string">"MPU6050 Bulunamadi!"</span>);
+    <span class="keyword">while</span> (1) delay(10);
+  }
+  
+  <span class="comment">// Hassasiyet Ayarları (Daha pürüzsüz hareket için)</span>
+  mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+  <span class="comment">// Wi-Fi Bağlantısı</span>
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+}
+
+<span class="keyword">void</span> loop() {
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+  <span class="comment">// İvme değerlerini al (m/s^2)</span>
+  <span class="keyword">float</span> x = a.acceleration.x;
+  <span class="keyword">float</span> y = a.acceleration.y;
+
+  <span class="comment">// UDP Paketini Gönder (Format: X,Y)</span>
+  udp.beginPacket(unrealIP, unrealPort);
+  udp.print(x);
+  udp.print(<span class="string">","</span>);
+  udp.print(y);
+  udp.endPacket();
+
+  <span class="comment">// Veri yığılmasını (Packet Loss) önlemek için 20ms bekle (50 FPS)</span>
+  delay(20); 
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Titreşimleri Azaltmak:</strong> <code>setFilterBandwidth</code> ayarı donanımsal bir filtredir. Titreyen bir elin hareketlerini yumuşatarak oyun motoruna çok daha pürüzsüz veriler akmasını sağlar.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Blueprint (Unreal Engine) Kodlaması</h2>
+            <p>Karakterinizin eline (Skeletal Mesh'teki sağ el soketine) bir Kılıç veya Asab modeli ekleyin. UDP'den saniyede 50 kez kablosuz olarak gelen <code>"5.2,-3.4"</code> tarzındaki metni parçalayıp bu kılıcın rotasyonuna bağlayacağız.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Kablosuz Veriyi Yakalamak:</strong> Proje 21'de kurduğumuz <span class="bp-event">Event On UDP Message Received</span> düğümünü kullanın. Gelen Byte verisini <span class="bp-pure">Bytes to String</span> ile metne dönüştürün.</li>
+                
+                <li><strong>Paketi Parçalamak:</strong> Gelen String verisini <span class="bp-array">Parse Into Array</span> düğümüne sokun (Ayırıcı/Delimiter kutusuna <code>,</code> yazın).</li>
+                
+                <li><strong>Verileri Ayıklamak ve Oranlamak:</strong>
+                    <ul>
+                        <li><span class="bp-array">Get(0)</span> (X Ekseni) düğümünü alıp <span class="bp-pure">To Float</span> yapın. Arduino'dan gelen -10 ile +10 arası veriyi, <span class="bp-pure">Map Range Clamped</span> ile kılıcın Roll (veya Pitch) ekseni için -90 ile +90 derece arasına oranlayın.</li>
+                        <li><span class="bp-array">Get(1)</span> (Y Ekseni) düğümünü alıp aynı şekilde Float'a çevirin ve diğer eksen için -90/+90 arasına oranlayın.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Kılıcı Döndürmek:</strong> Çıkan oranlanmış açıları <span class="bp-pure">Make Rotator</span> düğümünde uygun pinlere (Pitch ve Roll) takın. Son olarak kılıç (veya asab) referansınızı sahneye çekip <span class="bp-func">Set Relative Rotation</span> düğümüne bağlayın ve Make Rotator'dan çıkan sonucu buraya verin.</li>
+            </ol>
+            
+            <div class="alert-box alert-warning">
+                <strong>⚠️ Güvenlik Kilidi (Out of Bounds Hata Koruması):</strong> UDP paketleri havadan (Wi-Fi üzerinden) geldiği için bazen paket kayıpları olabilir ve eksik bir veri ("5.2," şeklinde) gelebilir. <code>Parse Into Array</code> düğümünden sonra mutlaka bir <span class="bp-pure">Length</span> düğümü çekip, dizinin uzunluğunun tam olarak <strong>2</strong>'ye eşit (==) olup olmadığını bir Branch ile kontrol edin. Yoksa oyun çöker!
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: 3D Üretim ve Test</h2>
+            <p>gençlerin yer aldığı teknoloji projesi sınıflarınızda, sadece kodlama değil donanım entegrasyonu da büyük yer tutuyor. Fusion 360, Blender veya Tinkercad gibi 3D tasarım yeteneklerini kullanarak, içine bir ESP32, bir Powerbank ve bir MPU6050 sığabilecek şık bir "Kılıç Kabzası" (Hilt) tasarlayın.</p>
+            <p>Kabzayı 3D yazıcıdan çıkartıp sistemi içine yerleştirdiklerinde, laboratuvarın herhangi bir yerinde kılıcı sallarken ekrandaki karakterin aynı kılıcı büyük bir akıcılıkla savurması, sanal gerçeklik donanımlarının altında yatan mühendisliği bizzat deneyimlemelerini sağlayacaktır.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

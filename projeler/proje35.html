@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje 35: Sanal Prodüksiyon - Sese Duyarlı Niagara Efektleri</title>
+    <style>
+        /* UNREAL ENGINE KONSEPT RENKLERİ */
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --text-muted: #8b929a;
+            --ue-blue: #007acc; 
+            --btn-bg: #2a3644;
+            --btn-hover: #3b4b5e;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --level6: #f1c40f; /* Seviye 6 Altın/Sarı (Prodüksiyon/Final) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #332a00 0%, #0b0c10 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--level6);
+            position: relative;
+        }
+
+        .header-container { max-width: 1000px; margin: 0 auto; position: relative; }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { background-color: var(--level6); color: #000; border-color: var(--level6); }
+
+        header h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 5px; }
+        header p { color: var(--level6); font-size: 1.1rem; font-weight: 500; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+            border-left: 5px solid var(--level6);
+        }
+
+        h2 { color: #ffffff; font-size: 1.7rem; margin-bottom: 20px; border-bottom: 1px solid var(--btn-bg); padding-bottom: 10px; }
+        h3 { color: var(--level6); margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; font-size: 1.05rem; }
+
+        .alert-box { padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; background-color: #161c24; border-left: 4px solid var(--ue-blue); }
+        .alert-info { border-color: var(--info-color); }
+        .alert-info strong { color: var(--info-color); }
+        .alert-warning { border-color: var(--warning-color); }
+        .alert-warning strong { color: var(--warning-color); }
+
+        ul, ol { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        li { margin-bottom: 10px; }
+        strong { color: #fff; }
+
+        .code-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #06080a;
+            border-radius: 6px;
+            border: 1px solid var(--btn-bg);
+            margin: 15px 0;
+            padding: 20px;
+        }
+
+        pre { font-family: 'Consolas', monospace; font-size: 0.95rem; color: #e2e8f0; margin: 0; line-height: 1.5; }
+        .comment { color: #6ee7b7; font-style: italic; }
+        .keyword { color: #cba6f7; }
+        .string { color: #f9e2af; }
+
+        /* Blueprint Node Renklendirmeleri */
+        .bp-node { display: inline-block; padding: 4px 10px; border-radius: 12px; font-family: Arial, sans-serif; font-size: 0.85rem; color: #fff; border: 1px solid #5a6b7c; margin: 0 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bp-event { background: linear-gradient(180deg, #900c3f 0%, #581845 100%); border-color: #c70039; }
+        .bp-func { background: linear-gradient(180deg, #1f618d 0%, #154360 100%); border-color: #2980b9; }
+        .bp-pure { background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border-color: #2ecc71; }
+        .bp-flow { background: linear-gradient(180deg, #b9770e 0%, #7e5109 100%); border-color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .back-btn { position: relative; top: 0; transform: none; margin-bottom: 15px; display: inline-flex; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="back-btn"><span>&#8592;</span> Anasayfa</a>
+            <div>
+                <h1>Proje 35: Audio-Reactive Sistemler</h1>
+                <p>Ses Sensörü ve Niagara Partikül Motoru ile Canlı Görsel Şov</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-card">
+            <h2>🎯 Senaryo: Müziğin Formu</h2>
+            <p>Oyun motorları artık devasa konser sahnelerinin arkasındaki dev LED ekranları (Volume) besleyen ana beyin konumunda. Müzik ritmine göre büyüyüp küçülen, renk değiştiren veya patlayan objeler, sahnede muazzam bir dinamizm yaratır.</p>
+            <p>Bu projede, bir **KY-038** veya **MAX4466** analog ses (mikrofon) sensörünü ESP32'ye bağlayacağız. Odanın içindeki müziğin bas vuruşlarını (Amplitude / Genlik) anlık olarak sayısallaştırıp Unreal Engine'e fırlatacağız. Unreal Engine'deki Niagara parçacık sisteminde özel bir değişken (User Parameter) oluşturarak ortamdaki müzik yüksekliğine göre bir alevin veya ses dalgası küresinin boyutunu değiştireceğiz.</p>
+            <br>
+            
+            <br><br>
+        </div>
+
+        <div class="section-card">
+            <h2>🤖 1. Fiziksel Katman: Gürültü Filtreleme (Peak Detection)</h2>
+            <p>Analog ses sensörlerinin <strong>A0 (Analog Out)</strong> bacağı, mikrofona gelen sesin frekans dalgalarını yansıtır. Ancak bize ham dalga değil, "Ses Şiddeti (Envelope)" lazımdır. Bunu bulmak için kısa bir zaman dilimindeki en yüksek ve en düşük dalga değerlerinin farkını (Peak-to-Peak) ölçeceğiz.</p>
+
+            <div class="code-wrapper">
+<pre><span class="comment">// ESP32 KODU: Ses Şiddeti (Amplitude) Ölçümü ve UDP Gönderimi</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiUdp.h&gt;
+
+<span class="keyword">const char</span>* ssid = <span class="string">"Laboratuvar_WiFi"</span>;
+<span class="keyword">const char</span>* password = <span class="string">"Sifre1234"</span>;
+<span class="keyword">const char</span>* unrealIP = <span class="string">"192.168.1.100"</span>;
+<span class="keyword">const int</span> unrealPort = 8888;
+
+WiFiUDP udp;
+<span class="keyword">const int</span> micPin = 34; <span class="comment">// ESP32 Analog Girişi</span>
+
+<span class="keyword">void</span> setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  <span class="keyword">while</span> (WiFi.status() != WL_CONNECTED) { delay(500); }
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">unsigned long</span> startMillis = millis();
+  <span class="keyword">int</span> signalMax = 0;
+  <span class="keyword">int</span> signalMin = 4095; <span class="comment">// ESP32'nin maksimum ADC çözünürlüğü</span>
+
+  <span class="comment">// 50 Milisaniye boyunca sesi dinle (Sampling Window)</span>
+  <span class="keyword">while</span> (millis() - startMillis < 50) {
+    <span class="keyword">int</span> micVerisi = analogRead(micPin);
+    <span class="keyword">if</span> (micVerisi < 4095) {  <span class="comment">// Parazit okumaları atla</span>
+      <span class="keyword">if</span> (micVerisi > signalMax) { signalMax = micVerisi; }
+      <span class="keyword">if</span> (micVerisi < signalMin) { signalMin = micVerisi; }
+    }
+  }
+
+  <span class="comment">// Sesin tepe (Peak) şiddetini hesapla</span>
+  <span class="keyword">int</span> peakToPeak = signalMax - signalMin;
+  
+  <span class="comment">// UDP ile gönder (Örn: "BEAT,1500")</span>
+  String veriPaketi = <span class="string">"BEAT,"</span> + String(peakToPeak);
+  
+  udp.beginPacket(unrealIP, unrealPort);
+  udp.print(veriPaketi);
+  udp.endPacket();
+}</pre>
+            </div>
+            
+            <div class="alert-box alert-info">
+                <strong>💡 Ses Kartı Yerine Mikrofon:</strong> Normalde VJ programları sesi doğrudan bilgisayarın ses kartından (Loopback) alır. Ancak biz ortam sesini (seyircilerin alkışı, fiziksel davul vb.) yakalamak istediğimiz için dışarıdan donanımsal bir mikrofon kullanmak sanal prodüksiyonda eşsiz bir etkileşim sunar.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>🟦 2. Unreal Engine Niagara Entegrasyonu</h2>
+            <p>Unreal Engine 5'te Niagara parçacık sistemi muazzamdır. Niagara'nın kendi içindeki değişkenleri dışarıdan, yani Event Graph'tan anlık olarak kontrol edebiliriz.</p>
+
+            <br>
+            
+            <br><br>
+
+            <h3>Adım Adım Bağlantılar:</h3>
+            <ol>
+                <li><strong>Niagara Sisteminde Değişken Tanımlama:</strong>
+                    <ul>
+                        <li>İçerik çekmecesinden yeni bir <em>Niagara System</em> oluşturun (Örn: Ateş veya Küre).</li>
+                        <li>Sistemi açın, sol taraftaki <strong>Parameters</strong> paneline gidin, '+' ikonuna tıklayıp yeni bir <strong>User Exposed -> Float</strong> değişkeni oluşturun (Adı: <code>MuzikSiddeti</code> olsun).</li>
+                        <li>Partikülün "Spawn Rate" (Doğma Hızı) veya "Scale Sprite Size" (Boyut) bölümüne gidin. Sabit bir sayı girmek yerine az önce oluşturduğunuz <code>User.MuzikSiddeti</code> değişkenini sürükleyip o kutucuğa bağlayın. Artık partikül dışarıdan yönetilebilir oldu!</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Blueprint İle Veriyi Yollamak:</strong>
+                    <ul>
+                        <li>Sahnede bulunan Niagara Actor'ünün referansını Level Blueprint'e sürükleyin.</li>
+                        <li>Ondan bir kablo çıkarıp <span class="bp-func">Set Niagara Variable (Float)</span> düğümünü çağırın.</li>
+                        <li><em>In Variable Name</em> kutusuna tam olarak <code>User.MuzikSiddeti</code> yazın (Harf büyüklüklerine dikkat edin).</li>
+                    </ul>
+                </li>
+
+                <li><strong>Veri Ayrıştırması:</strong>
+                    <ul>
+                        <li><span class="bp-event">Event On UDP Message Received</span> üzerinden gelen String'i <span class="bp-func">Parse Into Array</span> ile bölün.</li>
+                        <li><span class="bp-array">Get (0)</span> <code>BEAT</code> ise, <span class="bp-array">Get (1)</span> pinindeki değeri <span class="bp-pure">To Float</span> yapın.</li>
+                        <li>Arduino'dan gelen 0-4000 arası tepe değerini <span class="bp-pure">Map Range Clamped</span> ile partikülün isteyeceği mantıklı bir boyuta (Örn: 0.1 ile 5.0 arası) oranlayıp, az önce oluşturduğumuz Set Niagara Variable düğümünün <em>In Value</em> pinine takın.</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section-card">
+            <h2>🚀 Atölye Tatbikatı: İnteraktif Konser Sahnesi</h2>
+            <p>ARGE ekibinizle ses ve görseli muazzam bir ahenkle buluşturmanın tam vakti.</p>
+            <p>Laboratuvara bir hoparlör kurun ve bas frekansları yüksek bir elektronik müzik (EDM veya Cyberpunk müzikleri) açın. Sensörü hoparlöre yakın bir yere yerleştirin. Unreal Engine'deki sahneyi tam ekrana alın. Bass vuruşları (Beat) geldikçe, ekrandaki devasa Niagara partiküllerinin ritimle birebir aynı anda patladığını, küçülüp büyüdüğünü göreceksiniz. Bu, gençlere sadece oyun değil, canlı "Sahne Sanatları" ve "Etkileşimli Medya (Interactive Media)" tasarladıklarını en iyi şekilde hissettirecektir.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
